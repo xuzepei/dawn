@@ -1,4 +1,3 @@
 dawn
 ====
 
-dawn
