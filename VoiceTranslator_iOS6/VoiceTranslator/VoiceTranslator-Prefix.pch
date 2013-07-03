@@ -1,0 +1,112 @@
+//
+// Prefix header for all source files of the 'VoiceTranslator' target in the 'VoiceTranslator' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import <CoreData/CoreData.h>
+#endif
+
+#ifndef DEBUG
+#define NSLog //
+#endif
+
+#define TIME_OUT 20
+
+#define CT_UNKNOWN 0
+#define CT_XML 1
+#define CT_JSON 2
+
+#define APP_VERSION 1.0
+
+typedef enum {
+	NotReachable = 0,
+	ReachableViaWiFi,
+	ReachableViaWWAN
+} NetworkStatus;
+
+typedef enum {
+    
+    ET_UNKNOWN = 0,
+	ET_UTTERANCE,
+    ET_TTS,
+    
+}ErrorType;
+
+typedef enum{
+    RBT_LEFT = 0,
+    RBT_RIGHT
+}RECORD_BUTTON_TYPE;
+
+typedef enum{
+    SWT_UNKNOWN = 0,
+    SWT_DETECTEND,
+    SWT_AUTOSPEAK
+}SWITCH_TYPE;
+
+typedef enum{
+    CLT_LEFT = 0,
+    CLT_RIGHT
+}CHOOSE_LANGUAGE_TYPE;
+
+typedef enum{
+    BFT_UNKNOWN = 0,
+    BFT_TIME,
+    BFT_FROMTEXT,
+    BFT_TOTEXT,
+}BUBBLE_FONT_TYPE;
+
+typedef enum{
+    AT_UNKNOWN = 0,
+    AT_COPY,
+    AT_EDIT,
+    AT_SIRI,
+    AT_SHARE,
+    AT_DELETE,
+    AT_SPEAK,
+    AT_MAGNIFY,
+}ACTION_TYPE;
+
+typedef enum{
+    BT_FROM = 0,
+    BT_TO,
+}BUBBLE_TYPE;
+
+typedef enum {
+    OT_TOP = 0,
+    OT_BOTTOM,
+    OT_LEFT,
+    OT_RIGHT,
+    OT_MIDDLE,
+}ORIENTATION_TYPE;
+
+#define AD_ID @""
+
+#define NAVIGATION_BAR_COLOR [UIColor colorWithRed:0.03 green:0.51 blue:1.00 alpha:1.0]
+
+#define STATUS_BAR_HEIGHT 20.0
+#define NAVIGATION_BAR_HEIGHT 44.0
+
+
+#define BUBBLE_PADDING_TOP 4.0f
+#define BUBBLE_PADDING_BOTTOM 3.0f
+#define BUBBLE_PADDING_LEFT 14.0f
+#define BUBBLE_PADDING_RIGHT 8.0f
+#define BUBBLE_MARGIN_TOP 12.0f
+#define BUBBLE_MARGIN_BOTTOM 4.0f
+#define BUBBLE_LOADING_HEIGHT 30.0f
+#define BUBBLE_TIME_HEIGHT 16.0f
+#define BUBBLE_FROM_TO_INTERVAL 4.0f
+
+#define MIN_BUBBLE_WIDTH 60.0
+#define MIN_BUBBLE_HEIGHT 30.0
+
+#define DETECT_END_OF_SPEECH_NOTIFICATION @"DETECT_END_OF_SPEECH_NOTIFICATION"
+#define CLEAR_UP_NOTIFICATION @"CLEAR_UP_NOTIFICATION"
