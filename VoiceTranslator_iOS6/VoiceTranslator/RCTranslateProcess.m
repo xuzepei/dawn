@@ -218,6 +218,7 @@
                     
                     translation.ttsUrl = urlString;
                     translation.toText = translatedText;
+                    translation.toTextDetail = nil;
                     
                     NSString* ttsPath = [RCTool getTTSPath:urlString];
                     if([RCTool isExistingFile:ttsPath])

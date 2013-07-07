@@ -16,7 +16,9 @@
 @dynamic fromCode;
 @dynamic toCode;
 @dynamic fromText;
+@dynamic fromTextDetail;
 @dynamic toText;
+@dynamic toTextDetail;
 @dynamic fromVoice;
 @dynamic toVoice;
 @dynamic time;

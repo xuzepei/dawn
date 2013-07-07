@@ -12,6 +12,7 @@
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
     #import <CoreData/CoreData.h>
+    #import "GAI.h"
 #endif
 
 #ifndef DEBUG
@@ -25,6 +26,10 @@
 #define CT_JSON 2
 
 #define APP_VERSION 1.0
+
+#define ISFORIOS7 0
+
+#define GOOGLE_TRACKING_ID @"UA-42277910-1"
 
 typedef enum {
 	NotReachable = 0,
@@ -50,6 +55,12 @@ typedef enum{
     SWT_DETECTEND,
     SWT_AUTOSPEAK
 }SWITCH_TYPE;
+
+typedef enum{
+    SLT_UNKNOWN = 0,
+    SLT_VOLUME,
+    SLT_SPEED
+}SLIDER_TYPE;
 
 typedef enum{
     CLT_LEFT = 0,
@@ -107,6 +118,8 @@ typedef enum {
 
 #define MIN_BUBBLE_WIDTH 60.0
 #define MIN_BUBBLE_HEIGHT 30.0
+
+#define BUBBLE_EDGE_INSETS UIEdgeInsetsMake(12, 20, 13, 22)
 
 #define DETECT_END_OF_SPEECH_NOTIFICATION @"DETECT_END_OF_SPEECH_NOTIFICATION"
 #define CLEAR_UP_NOTIFICATION @"CLEAR_UP_NOTIFICATION"

@@ -45,6 +45,7 @@
 @property(assign)BOOL isEditing;
 @property(nonatomic,retain)RCMagnifyView* magnifyView;
 @property(nonatomic,retain)UIImageView* loadingImageView;
+@property(nonatomic,retain)UILabel* tipLabel;
 
 
 @end

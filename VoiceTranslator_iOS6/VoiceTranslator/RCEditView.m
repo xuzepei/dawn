@@ -105,8 +105,10 @@
     
     self.translation.fromText = text;
     self.translation.fromVoice = nil;
+    self.translation.fromTextDetail = nil;
     self.translation.toText = nil;
     self.translation.toVoice = nil;
+    self.translation.toTextDetail = nil;
     
     if(_delegate && [_delegate respondsToSelector:@selector(translateText:)])
     {

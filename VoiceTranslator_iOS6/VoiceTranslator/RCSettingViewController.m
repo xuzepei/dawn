@@ -11,12 +11,14 @@
 #import "RCSwitchCell.h"
 #import "RCChooseLanguageViewController.h"
 #import "RCHelpViewController.h"
+#import "RCSliderCell.h"
 
 #define CLEAR_TAG 200
 
 typedef enum {
     ST_LANGUAGE = 0,
 	ST_VOICE,
+    ST_VOLUME,
     ST_CLEANUP,
     ST_HELP,
 }SettingType;
@@ -90,8 +92,8 @@ typedef enum {
     if(nil == _tableView)
     {
         CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-        //        if([RCTool systemVersion] >= 7.0)
-        //            height = [RCTool getScreenSize].height;
+        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+            height = [RCTool getScreenSize].height;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStyleGrouped];
@@ -105,7 +107,7 @@ typedef enum {
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 4;
+	return 5;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -117,6 +119,10 @@ typedef enum {
 	else if(ST_VOICE == section)
 	{
 		return NSLocalizedString(@"Voice", @"");
+	}
+    else if(ST_VOLUME == section)
+	{
+		return NSLocalizedString(@"Volume & Speed", @"");
 	}
 	else if(ST_CLEANUP == section)
 	{
@@ -136,6 +142,8 @@ typedef enum {
 	if(ST_LANGUAGE == section)
 		return 2;
 	else if(ST_VOICE == section)
+		return 2;
+    else if(ST_VOLUME == section)
 		return 2;
 	else if(ST_CLEANUP == section)
 		return 1;
@@ -159,6 +167,7 @@ typedef enum {
 	static NSString *cellId3 = @"cellId3";
 	static NSString *cellId4 = @"cellId4";
     static NSString *cellId5 = @"cellId5";
+    static NSString *cellId6 = @"cellId6";
 	
 	UITableViewCell *cell = nil;
 	if(ST_LANGUAGE == indexPath.section)
@@ -241,6 +250,23 @@ typedef enum {
 			[temp updateContent:SWT_AUTOSPEAK];
 		}
 	}
+    else if(ST_VOLUME == indexPath.section)
+	{
+        cell = [tableView dequeueReusableCellWithIdentifier:cellId6];
+        if (cell == nil)
+        {
+            cell = [[[RCSliderCell alloc] initWithStyle: UITableViewCellStyleDefault
+                                        reuseIdentifier: cellId6] autorelease];
+            cell.accessoryType = UITableViewCellAccessoryNone;
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
+        
+        RCSliderCell* temp = (RCSliderCell*)cell;
+        if(0 == indexPath.row)
+            [temp updateContent:SLT_VOLUME];
+        else if(1 == indexPath.row)
+            [temp updateContent:SLT_SPEED];
+	}
 	else if(ST_CLEANUP == indexPath.section)
 	{
         cell = [tableView dequeueReusableCellWithIdentifier:cellId4];
@@ -250,7 +276,7 @@ typedef enum {
                                            reuseIdentifier: cellId4] autorelease];
             cell.accessoryType = UITableViewCellAccessoryNone;
             
-            cell.textLabel.text = NSLocalizedString(@"Clear Translation History",@"");
+            cell.textLabel.text = NSLocalizedString(@"Clear History",@"");
         }
 	}
     else if(ST_HELP == indexPath.section)
@@ -283,7 +309,7 @@ typedef enum {
 {
 	[tableView deselectRowAtIndexPath: indexPath animated: YES];
     
-    if(0 == indexPath.section)//Languages
+    if(ST_LANGUAGE == indexPath.section)
     {
         if(0 == indexPath.row)
         {
@@ -300,9 +326,9 @@ typedef enum {
             [temp release];
         }
     }
-    else if(2 == indexPath.section)//Clear history
-    {
-        UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:@""
+    else if(ST_CLEANUP == indexPath.section)
+    { 
+        UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure clear all translation history?"
                                                                   delegate:self
                                                          cancelButtonTitle:@"Cancel"
                                                     destructiveButtonTitle:@"Clear Up"
@@ -314,16 +340,28 @@ typedef enum {
         //[actionSheet release];
         
     }
-    else if(3 == indexPath.section)
+    else if(ST_HELP == indexPath.section)
     {
-        if( 0 == indexPath.row)
+        if(0 == indexPath.row)
         {
+            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+            [tracker sendEventWithCategory:@"Action"
+                                withAction:@"button_press"
+                                 withLabel:@"help"
+                                 withValue:nil];
+            
             RCHelpViewController* temp = [[RCHelpViewController alloc] initWithNibName:nil bundle:nil];
             [self.navigationController pushViewController:temp animated:YES];
             [temp release];
         }
         else if(1 == indexPath.row)
         {
+            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+            [tracker sendEventWithCategory:@"Action"
+                                withAction:@"button_press"
+                                 withLabel:@"feedback"
+                                 withValue:nil];
+            
             [self feedback];
         }
     }
@@ -337,6 +375,12 @@ typedef enum {
     {
         if(0 == buttonIndex)
         {
+            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+            [tracker sendEventWithCategory:@"Action"
+                                withAction:@"button_press"
+                                 withLabel:@"clear_history"
+                                 withValue:nil];
+            
             NSLog(@"clear up");
             [[NSNotificationCenter defaultCenter] postNotificationName:CLEAR_UP_NOTIFICATION object:nil];
             [RCTool deleteOldData];
@@ -374,12 +418,14 @@ typedef enum {
             [subject appendFormat:@"%.2f",APP_VERSION];
             [subject appendFormat:@", iOS %.2f",[RCTool systemVersion]];
             
+            [subject appendFormat:@", device type %d",UI_USER_INTERFACE_IDIOM()];
+            
             [mailComposeViewController setSubject:subject];
             
             [mailComposeViewController setToRecipients:[NSArray arrayWithObject:@"intelligentapps@gmail.com"]];
             
             NSMutableString *mailContent = [[NSMutableString alloc] init];
-            [mailContent appendString:@"If you have any question, please let us know. Thanks."];
+            [mailContent appendString:@"If you have any suggestions, questions or need some help, just write us here. We are always happy to help you as soon as possible."];
             
             [mailComposeViewController setMessageBody:mailContent isHTML:NO];
             [mailContent release];

@@ -56,8 +56,8 @@
     if(nil == _scrollView)
     {
         CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-//        if([RCTool systemVersion] >= 7.0)
-//            height = [RCTool getScreenSize].height;
+        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+            height = [RCTool getScreenSize].height;
         
         self.scrollView = [[[RCAdScrollView alloc] initWithFrame:CGRectMake(0, 0, [RCTool getScreenSize].width,height)] autorelease];
     }

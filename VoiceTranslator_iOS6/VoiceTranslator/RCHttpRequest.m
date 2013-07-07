@@ -21,6 +21,24 @@
 @synthesize _expectedContentLength;
 @synthesize _currentLength;
 @synthesize _urlConnection;
+@synthesize _resultSelector;
+
++ (RCHttpRequest*)sharedInstance
+{
+    static RCHttpRequest* sharedInstance = nil;
+    if(nil == sharedInstance)
+    {
+        @synchronized([RCHttpRequest class])
+        {
+            if (nil == sharedInstance)
+            {
+                sharedInstance = [[RCHttpRequest alloc] init];
+            }
+        }
+    }
+    
+    return sharedInstance;
+}
 
 - (id)init
 {
@@ -40,31 +58,138 @@
 - (void)dealloc
 {
 	_isConnecting = NO;
-	[_receivedData release];
+    if(_receivedData)
+    {
+        [_receivedData release];
+        _receivedData = nil;
+    }
+    
 	self._delegate = nil;
-	[_requestingURL release];
-	[_token release];
+    
+    if(_requestingURL)
+    {
+        [_requestingURL release];
+        _requestingURL =nil;
+    }
+    
+    if(_token)
+    {
+        [_token release];
+        _token =nil;
+    }
+    
 	self._urlConnection = nil;
 	
 	[super dealloc];
 }
 
-#pragma mark -
-#pragma mark  NSURLConnection delegate
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+- (void)cancel
 {
-    [_receivedData appendData: data];
+    if(_urlConnection)
+    {
+        [_urlConnection cancel];
+        [self connection:_urlConnection didFailWithError:nil];
+    }
+    
+    _isConnecting = NO;
+    self._receivedData = nil;
+	self._urlConnection = nil;
 }
 
-- (void)connection:(NSURLConnection *)connection
-  didFailWithError:(NSError *)error
+
+- (BOOL)request:(NSString*)urlString delegate:(id)delegate resultSelector:(SEL)resultSelector token:(id)token
 {
-	_isConnecting = NO;
-	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-	[_receivedData setLength:0];
-    [connection release];
+    if(0 == [urlString length] || _isConnecting)
+        return NO;
+    
+    self._resultSelector = resultSelector;
+	self._delegate = delegate;
+	self._token = token;
+	NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] init] autorelease];
+	self._requestingURL = urlString;
+	urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+	[request setURL:[NSURL URLWithString: urlString]];
+	[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+	[request setTimeoutInterval: TIME_OUT];
+	[request setHTTPShouldHandleCookies:FALSE];
+	[request setHTTPMethod:@"GET"];
+    
+    NSLog(@"request:%@",_requestingURL);
 	
+    BOOL isSuccess = YES;
+    
+    NSURLConnection * urlConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
+    
+	if(urlConnection)
+	{
+        self._urlConnection = urlConnection;
+        
+		_isConnecting = YES;
+		[_receivedData setLength: 0];
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+		
+        //		if([_delegate respondsToSelector: @selector(willStartHttpRequest:)])
+        //			[_delegate willStartHttpRequest:nil];
+	}
+    else
+    {
+        isSuccess = NO;
+    }
+    
+    [urlConnection release];
+    
+    return isSuccess;
+}
+
+
+- (BOOL)post:(NSString*)urlString delegate:(id)delegate resultSelector:(SEL)resultSelector token:(id)token
+{
+    if(0 == [urlString length] || _isConnecting)
+        return NO;
+    
+    self._resultSelector = resultSelector;
+	self._delegate = delegate;
+	self._token = token;
+	NSMutableURLRequest *request = [[[NSMutableURLRequest alloc] init] autorelease];
+	self._requestingURL = urlString;
+	urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+	[request setURL:[NSURL URLWithString: urlString]];
+	[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+	[request setTimeoutInterval: TIME_OUT];
+	[request setHTTPShouldHandleCookies:FALSE];
+	[request setHTTPMethod:@"POST"];
+    
+    NSString* body = (NSString*)_token;
+    if([body length])
+    {
+        [request setHTTPBody: [body dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    NSLog(@"post:%@",_requestingURL);
+	
+    BOOL isSuccess = YES;
+    
+    NSURLConnection * urlConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:YES];
+    
+	if (urlConnection)
+	{
+        self._urlConnection = urlConnection;
+        
+		_isConnecting = YES;
+		[_receivedData setLength: 0];
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+		
+        //		if([_delegate respondsToSelector: @selector(willStartHttpRequest:)])
+        //			[_delegate willStartHttpRequest:nil];
+	}
+    else
+    {
+        isSuccess = NO;
+    }
+    
+    [urlConnection release];
+    
+    return isSuccess;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
@@ -73,28 +198,80 @@
 	NSDictionary* header = [(NSHTTPURLResponse*)response allHeaderFields];
 	NSString *content_type = [header valueForKey:@"Content-Type"];
 	_contentType = CT_UNKNOWN;
-	if (content_type) 
+	if (content_type)
 	{
-		if ([content_type rangeOfString:@"xml"].location != NSNotFound) 
+		if ([content_type rangeOfString:@"xml"].location != NSNotFound)
 			_contentType = CT_XML;
 		else if ([content_type rangeOfString:@"json"].location != NSNotFound)
 			_contentType = CT_JSON;
 	}
 }
 
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
-	_isConnecting = NO;
-	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-	[_receivedData setLength:0];
-	[connection release];
+    if (_receivedData == nil) {
+        _receivedData = [[NSMutableData alloc] initWithCapacity:0];
+    }
+    [_receivedData appendData: data];
 }
 
-- (void)cancel
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    if(self._urlConnection)
+	NSLog(@"connectionDidFinishLoading:%d",_statusCode);
+    
+	if(200 == _statusCode)
+	{
+        NSString* jsonString = [[NSString alloc] initWithData:_receivedData encoding:NSUTF8StringEncoding];
+        
+		_isConnecting = NO;
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+		[_receivedData setLength:0];
+        
+        if(_resultSelector && [_delegate respondsToSelector:_resultSelector])
+        {
+            NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+            if([jsonString length])
+                [dict setObject:jsonString forKey:@"content"];
+            if(_token)
+                [dict setObject:_token forKey:@"token"];
+            [_delegate performSelector:_resultSelector withObject:dict];
+            [dict release];
+        }
+        
+        [jsonString release];
+        
+	}
+	else
+	{
+		_isConnecting = NO;
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+		[_receivedData setLength:0];
+		
+        if(_resultSelector && [_delegate respondsToSelector:_resultSelector])
+        {
+            [_delegate performSelector:_resultSelector withObject:nil];
+        }
+        else
+        {
+            SEL selector = @selector(finishedRequest:token:);
+            if(_delegate && [_delegate respondsToSelector:selector])
+                [_delegate finishedRequest:nil token:nil];
+        }
+	}
+}
+
+- (void)connection:(NSURLConnection *)connection
+  didFailWithError:(NSError *)error
+{
+	NSLog(@"didFailWithError");
+    
+	_isConnecting = NO;
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	[_receivedData setLength: 0];
+    
+    if(_resultSelector && [_delegate respondsToSelector:_resultSelector])
     {
-        [_urlConnection cancel];
+        [_delegate performSelector:_resultSelector withObject:nil];
     }
 }
 

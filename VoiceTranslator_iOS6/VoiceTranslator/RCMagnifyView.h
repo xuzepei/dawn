@@ -7,12 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Translation.h"
+#import "RCHttpRequest.h"
+#import "ASIHTTPRequest.h"
 
-@interface RCMagnifyView : UIView
+@interface RCMagnifyView : UIView<UIWebViewDelegate>
 
 @property(nonatomic,retain)UIButton* closeButton;
-@property(nonatomic,retain)NSString* text;
+@property(nonatomic,retain)Translation* translation;
+@property(nonatomic,retain)UIWebView* webView;
+@property(assign)BUBBLE_TYPE type;
+@property(nonatomic,retain)UIActivityIndicatorView* indicatorView;
 
-- (void)updateContent:(NSString*)text;
+- (void)updateContent:(Translation*)translation type:(BUBBLE_TYPE)type;
 
 @end

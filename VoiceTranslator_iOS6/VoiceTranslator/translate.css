@@ -1,0 +1,55 @@
+
+body{
+max-width:300px;
+height:auto;margin:7px;
+font-size:18px;
+word-wrap:break-word;
+
+/** 网页中点击选中区域高亮颜色设置 */
+-webkit-tap-highlight-color:none;
+
+/** 网页中长按链接不会弹出ActionSheet */
+-webkit-touch-callout:none;
+
+/** 关闭旋转后自动调整字体大小 */
+-webkit-text-size-adjust: none;
+}
+
+.magnify{
+    max-width:300px;
+    padding-top:80px;
+    text-align:center;
+    font-size:46px;
+}
+
+/**
+单词显示
+*/
+.word{
+font-family:Helvetica-Bold;
+font-size:36px;
+word-wrap:break-word;
+}
+
+table{
+border-spacing:0;
+}
+
+#cixing{
+    font-size:18px;
+}
+
+img{
+    width:16px;
+    height16px;
+}
+
+.sentences{
+margin-left:0px;
+padding-left:0px
+}
+
+li{
+    padding-top:4px
+    font-size:16px;
+}

@@ -21,7 +21,7 @@
     if (self) {
         
         _itemArray = [[NSMutableArray alloc] init];
-        [_itemArray addObjectsFromArray:[RCTool getLanguages]];
+        [_itemArray addObjectsFromArray:[RCTool getLanguages:YES]];
 
         self.title = NSLocalizedString(@"Choose Language", @"");
     }
@@ -82,11 +82,11 @@
     {
         CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
         UITableViewStyle style = UITableViewStyleGrouped;
-//        if([RCTool systemVersion] >= 7.0)
-//        {
-//            height = [RCTool getScreenSize].height;
-//            style = UITableViewStylePlain;
-//        }
+        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        {
+            height = [RCTool getScreenSize].height;
+            style = UITableViewStylePlain;
+        }
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:style];

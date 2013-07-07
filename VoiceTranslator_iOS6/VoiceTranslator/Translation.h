@@ -18,7 +18,9 @@
 @property (nonatomic, retain) NSString * fromCode;
 @property (nonatomic, retain) NSString * toCode;
 @property (nonatomic, retain) NSString * fromText;
+@property (nonatomic, retain) NSString * fromTextDetail;
 @property (nonatomic, retain) NSString * toText;
+@property (nonatomic, retain) NSString * toTextDetail;
 @property (nonatomic, retain) NSString * fromVoice;
 @property (nonatomic, retain) NSString * toVoice;
 @property (nonatomic, retain) NSNumber * time;

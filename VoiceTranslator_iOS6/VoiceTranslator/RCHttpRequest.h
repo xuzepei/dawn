@@ -45,6 +45,14 @@
 @property (assign) long long _currentLength;
 @property (nonatomic, retain) NSURLConnection* _urlConnection;
 
+@property(assign)SEL _resultSelector;
+
++ (RCHttpRequest*)sharedInstance;
+- (BOOL)request:(NSString*)urlString
+	   delegate:(id)delegate
+ resultSelector:(SEL)resultSelector
+		  token:(id)token;
+- (BOOL)post:(NSString*)urlString delegate:(id)delegate resultSelector:(SEL)resultSelector token:(id)token;
 - (void)cancel;
 
 @end

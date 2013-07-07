@@ -96,6 +96,8 @@
     self.magnifyView = nil;
     self.loadingImageView = nil;
     
+    self.tipLabel = nil;
+    
     [super dealloc];
 }
 
@@ -127,6 +129,8 @@
     [self initRecordButton];
     
     [self initLevelMeter];
+    
+    [self initTipLabel];
     
     
     if([RCTool getShowHintMask])
@@ -217,8 +221,8 @@
     if(nil == _tableView)
     {
         CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-//        if([RCTool systemVersion] >= 7.0)
-//            height = [RCTool getScreenSize].height;
+        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+            height = [RCTool getScreenSize].height;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStylePlain];
@@ -336,8 +340,8 @@
 - (void)initLevelMeter
 {
     CGFloat y = [RCTool getScreenSize].height - 66 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-//    if([RCTool systemVersion] >= 7.0)
-//        y = [RCTool getScreenSize].height - 66;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - 66;
     
     if(nil == _leftLevelMeter)
     {
@@ -411,8 +415,8 @@
 //    [self.view addSubview: maskView];
     
     CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 10;
-//    if([RCTool systemVersion] >= 7.0)
-//        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 10;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 10;
     
     if(nil == _firstRecordButton)
     {
@@ -464,6 +468,8 @@
             [_recordController stop];
             
             [RCTool playSound:@"record_end.wav"];
+            
+            [self updateTipLabelByStep:2];
             
             if(_recordController.type != buttonTag)
             {
@@ -553,6 +559,8 @@
 
 - (void)detectEndOfSpeech:(NSNotification*)notification
 {
+    [self updateTipLabelByStep:2];
+    
     if(_recordController)
     {
         _settingButton.enabled = YES;
@@ -612,12 +620,19 @@
 
 - (void)clickedFirstRecordButton:(id)token
 {
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"button_press"
+                         withLabel:@"left_record"
+                         withValue:nil];
+    
     NSDictionary* dict = (NSDictionary*)token;
     NSString* touchEvent = [dict objectForKey:@"touch_event"];
     NSString* fromLanguage = [dict objectForKey:@"language"];
     NSString* toLanguage = [dict objectForKey:@"to_language"];
     if([touchEvent length] && [touchEvent isEqualToString:@"touch_end"])
     {
+        [self updateTipLabelByStep:1];
         NSLog(@"clickedFirstRecordButton");
         [self clickedRecordButton:fromLanguage toLanguage:toLanguage buttonTag:RBT_LEFT];
     }
@@ -625,6 +640,12 @@
 
 - (void)clickedSecondRecordButton:(id)token
 {
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"button_press"
+                         withLabel:@"right_record"
+                         withValue:nil];
+    
     NSDictionary* dict = (NSDictionary*)token;
     NSString* touchEvent = [dict objectForKey:@"touch_event"];
     NSString* fromLanguage = [dict objectForKey:@"language"];
@@ -632,6 +653,7 @@
     
     if([touchEvent length] && [touchEvent isEqualToString:@"touch_end"])
     {
+        [self updateTipLabelByStep:1];
         NSLog(@"clickedSecondRecordButton");
         [self clickedRecordButton:fromLanguage toLanguage:toLanguage buttonTag:RBT_RIGHT];
     }
@@ -917,8 +939,8 @@
     if(nil == _loadingImageView)
     {
         CGFloat y = [RCTool getScreenSize].height - 66 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-//        if([RCTool systemVersion] >= 7.0)
-//            y = [RCTool getScreenSize].height - 66;
+        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+            y = [RCTool getScreenSize].height - 66;
         
         _loadingImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 60, 11)];
         
@@ -998,6 +1020,12 @@
     
     if(AT_COPY == actionType)
     {
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"copy"
+                             withValue:nil];
+        
         NSString* text = nil;
         if(BT_FROM == bubbleType)
             text = translation.fromText;
@@ -1008,6 +1036,12 @@
     }
     else if(AT_SPEAK == actionType)
     {
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"speak"
+                             withValue:nil];
+        
         if(BT_FROM == bubbleType)
         {
             if(0 == [translation.fromVoice length])
@@ -1026,6 +1060,12 @@
     }
     else if(AT_EDIT == actionType)
     {
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"edit"
+                             withValue:nil];
+        
         if(BT_FROM == bubbleType)
         {
             [self editText:translation];
@@ -1033,16 +1073,22 @@
     }
     else if(AT_MAGNIFY == actionType)
     {
-        NSString* text = nil;
-        if(BT_FROM == bubbleType)
-            text = translation.fromText;
-        else if(BT_TO == bubbleType)
-            text = translation.toText;
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"magnify"
+                             withValue:nil];
         
-        [self magnify:text];
+        [self magnify:translation type:bubbleType];
     }
     else if(AT_DELETE == actionType)
     {
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"delete"
+                             withValue:nil];
+        
         self.selectedTranslation = translation;
         
         UIAlertView* alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Hint", @"")
@@ -1132,9 +1178,9 @@
     [pasteboard setString:text];
 }
 
-- (void)magnify:(NSString*)text
+- (void)magnify:(Translation*)translation type:(BUBBLE_TYPE)type
 {
-    if(0 == [text length])
+    if(nil == translation)
         return;
     
     if(nil == _magnifyView)
@@ -1143,7 +1189,7 @@
     }
     
     _magnifyView.frame = CGRectMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0,0,0);
-    [_magnifyView updateContent:text];
+    [_magnifyView updateContent:translation type:type];
     [[RCTool frontWindow] addSubview:_magnifyView];
 }
 
@@ -1353,6 +1399,12 @@
 {
     if(SHARE_TAG == actionSheet.tag)
     {
+        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+        [tracker sendEventWithCategory:@"Action"
+                            withAction:@"button_press"
+                             withLabel:@"share"
+                             withValue:[NSNumber numberWithInt:buttonIndex]];
+        
         if([RCTool systemVersion] >= 6.0)
         {
             if(0 == buttonIndex)//facebook
@@ -1401,6 +1453,60 @@
     }
 }
 
+#pragma mark - Tip Label
+
+- (void)initTipLabel
+{
+    if(NO == [RCTool getShowTipLabel])
+        return;
+    
+    [RCTool setShowTipLabel:NO];
+    
+    CGFloat y = [RCTool getScreenSize].height - 86 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - 86;
+    
+    if(nil == _tipLabel)
+    {
+        _tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 300, 20)];
+        _tipLabel.backgroundColor = [UIColor clearColor];
+        _tipLabel.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
+        _tipLabel.font = [UIFont systemFontOfSize:14];
+        _tipLabel.textAlignment = UITextAlignmentCenter;
+        [self updateTipLabelByStep:0];
+    }
+    
+    [self.view addSubview: _tipLabel];
+}
+
+- (void)updateTipLabelByStep:(int)stepIndex
+{
+    if(nil == _tipLabel)
+        return;
+    
+    NSString* tip = nil;
+    
+    switch (stepIndex) {
+        case 0:
+            tip = @"Click any language button below";
+            break;
+        case 1:
+            tip = @"Say to the microphone";
+            break;
+        case 2:
+        {
+            tip = @"";
+            [_tipLabel removeFromSuperview];
+            self.tipLabel = nil;
+            break;
+        }
+        default:
+            break;
+    }
+    
+    _tipLabel.text = tip;
+}
+
 #pragma mark - Keyboard notification
 
 - (void)keyboardWillShow: (NSNotification*)notification
@@ -1416,8 +1522,8 @@
             
             CGRect rect = _editView.frame;
             CGFloat y = [RCTool getScreenSize].height - keyboardRect.size.height - rect.size.height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
-//            if([RCTool systemVersion] >= 7.0)
-//                y = [RCTool getScreenSize].height - keyboardRect.size.height - rect.size.height;
+            if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+                y = [RCTool getScreenSize].height - keyboardRect.size.height - rect.size.height;
             rect.origin.y = y;
             _editView.frame = rect;
             

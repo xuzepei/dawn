@@ -14,6 +14,7 @@
 #import "Translation.h"
 #import "ASIHTTPRequest.h"
 #import <AudioToolbox/AudioToolbox.h>
+#import "NSString+HTML.h"
 
 static SystemSoundID g_soundID = 0;
 
@@ -168,23 +169,49 @@ static int g_reachabilityType = -1;
 
 + (void)playSound:(NSString*)filename
 {
-    if(g_soundID || 0 == [filename length])
-	    return;
+    if(0 == [filename length])
+        return;
     
-    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback
-                                           error: NULL];
+    NSString* path = [[NSBundle mainBundle] pathForResource:filename ofType:@""];
     
-    [[AVAudioSession sharedInstance] setActive:YES
-                                         error:NULL];
+    if([RCTool isExistingFile:path])
+    {
+        //if(nil == _mp3Player)
+        {
+            AVAudioSession * sharedSession = [AVAudioSession sharedInstance];
+            [sharedSession setCategory:AVAudioSessionCategoryPlayback error:NULL];
+            [sharedSession setActive:YES error:NULL];
+            
+            AVAudioPlayer* mp3Player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path]
+                                                                              error:nil];
+            
+            //[_mp3Player stop];
+            mp3Player.delegate = nil;
+            mp3Player.volume = [RCTool getVolume];
+            [mp3Player prepareToPlay];
+            [mp3Player play];
+        }
+        
+        
+    }
     
-	NSString *path = [[NSBundle mainBundle] pathForResource:filename ofType:nil];
-	
-	NSURL *fileUrl = [NSURL fileURLWithPath:path];
-    
-    g_soundID = 0;
-	AudioServicesCreateSystemSoundID((CFURLRef)fileUrl, &g_soundID);
-	AudioServicesAddSystemSoundCompletion(g_soundID,NULL,NULL,systemSoundCompletionProc, NULL);
-	AudioServicesPlaySystemSound(g_soundID);
+//    if(g_soundID || 0 == [filename length])
+//	    return;
+//    
+//    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback
+//                                           error: NULL];
+//    
+//    [[AVAudioSession sharedInstance] setActive:YES
+//                                         error:NULL];
+//    
+//	NSString *path = [[NSBundle mainBundle] pathForResource:filename ofType:nil];
+//	
+//	NSURL *fileUrl = [NSURL fileURLWithPath:path];
+//    
+//    g_soundID = 0;
+//	AudioServicesCreateSystemSoundID((CFURLRef)fileUrl, &g_soundID);
+//	AudioServicesAddSystemSoundCompletion(g_soundID,NULL,NULL,systemSoundCompletionProc, NULL);
+//	AudioServicesPlaySystemSound(g_soundID);
 }
 
 + (UIImage*)createImage:(NSString*)imageName
@@ -199,6 +226,242 @@ static int g_reachabilityType = -1;
     UIImage* image = [[UIImage alloc] initWithContentsOfFile:imagePath];
     
     return image;
+}
+
++ (NSString*)createBody:(NSDictionary*)dict
+{
+    if(nil == dict)
+        return nil;
+    
+    NSMutableString* body = [[[NSMutableString alloc] init] autorelease];
+    NSString* name = [dict objectForKey:@"name"];
+    if(0 ==[name length])
+        return nil;
+    
+    [body appendFormat:@"<div class=\"word\">%@</div>",name];
+    
+    NSArray* segments = [dict objectForKey:@"segments"];
+    if(0 == [segments count])
+        return nil;
+    
+    for(NSDictionary* segment in segments)
+    {
+        NSString* cixing = [segment objectForKey:@"cixing"];
+        if(0 == [cixing length])
+            cixing = @"";
+        
+        NSString* phonetic = [segment objectForKey:@"phonetic"];
+        if(0 == [phonetic length])
+            phonetic = @"";
+        
+        [body appendString:@"<table><tbody><tr><td><p id=\"cixing\">"];
+        
+        if([cixing length])
+        {
+            [body appendFormat:@"<em>%@</em>",cixing];
+        }
+        
+        if([phonetic length])
+        {
+            [body appendFormat:@" %@ ",phonetic];
+        }
+        
+        NSString* sound = [segment objectForKey:@"sound"];
+        if(0 == [sound length])
+        {
+            [body appendString:@"</p>"];
+        }
+        else{
+            [body appendFormat:@"<a href=\"%@\"><img src=\"speaker@2x.png\"></a></p>",sound];
+        }
+        
+
+        
+        NSArray* sentences = [segment objectForKey:@"sentences"];
+        if([sentences count])
+        {
+//                 <ol>
+//                 <li>Coffee</li>
+//                 <li>Milk</li>
+//                 </ol>
+            [body appendString:@"<div class=\"sentences\"><ol>"];
+            
+             for(NSDictionary* sentence in sentences)
+             {
+                 NSString* text = [sentence objectForKey:@"text"];
+                 if([text length])
+                 {
+                    [body appendFormat:@"<li>%@</li>",text];
+                 }
+
+             }
+            
+            [body appendString:@"</ol></div>"];
+
+        }
+        
+        [body appendString:@"</td></tr></tbody></table>"];
+    }
+    
+   //<table style=\"border-spacing:0\"><tbody><tr><td valign="top" width="60%"><!--m--><p style="font-size:small"><em>noun</em> /inˌvestiˈgāSHən/ <span class="speaker-icon-listen-off" data-s="investigation.mp3" id="dictionary_speaker_icon_1" jsaction="dict.l"></span><br><span style="color:#767676">investigations, plural</span></p><div class="std" style="padding-left:40px"><ol><div><li style="list-style:decimal">The action of investigating something or someone; formal or systematic examination or research<div class="std" style="padding-left:20px"><ul><li style="color:#767676;list-style:none">- he is <b>under <em>investigation</em></b> for receiving illicit funds</li></ul><br></div></li><li style="list-style:decimal">A formal inquiry or systematic study<div class="std" style="padding-left:20px"><ul><li style="color:#767676;list-style:none">- an <b><em>investigation</em></b> has been launched <b>into</b> the potential impact of the oil spill</li></ul><br></div></li></div></ol></div><!--n--><div id="pronunciation_flash" style="display:block;height:0;position:absolute;width:0"></div><br><hr align="left" style="background:#c9d7f1;border:0;color:#c9d7f1;height:1px;margin:0"><!--n--></td></tr></tbody></table>
+    
+    return body;
+}
+
++ (NSDictionary*)parseToDetail:(NSString*)jsonString
+{
+    if(0 == [jsonString length])
+		return nil;
+    
+    NSRange range1 = [jsonString rangeOfString:@"{"];
+    NSRange range2 = [jsonString rangeOfString:@"}" options:NSBackwardsSearch];
+    
+    if(range1.location != NSNotFound && range2.location != NSNotFound)
+    {
+        jsonString = [jsonString substringWithRange:NSMakeRange(range1.location, range2.location - range1.location + 1)];
+    }
+    else
+        return nil;
+    
+    jsonString = [jsonString stringByReplacingOccurrencesOfString:@"\\x3c" withString:@"<"];
+    jsonString = [jsonString stringByReplacingOccurrencesOfString:@"\\x3e" withString:@">"];
+    jsonString = [jsonString stringByReplacingOccurrencesOfString:@"\\x27" withString:@"\'"];
+    jsonString = [jsonString stringByReplacingOccurrencesOfString:@"\\x22" withString:@"\""];
+    
+	SBJSON* sbjson = [[SBJSON alloc] init];
+    
+    NSError* error = nil;
+	NSDictionary* dict = [sbjson objectWithString:jsonString error:&error];
+    
+    if(error)
+        NSLog(@"error:%@",[error description]);
+	
+	if(dict && [dict isKindOfClass:[NSDictionary class]])
+	{
+        [sbjson release];
+
+        NSMutableDictionary* word = [[[NSMutableDictionary alloc] init] autorelease];
+        
+        NSArray* primaries = [dict objectForKey:@"primaries"];
+        if(primaries && [primaries isKindOfClass:[NSArray class]] && [primaries count])
+        {
+            NSString* query = [dict objectForKey:@"query"];
+            if([query length])
+            {
+                [word setObject:query forKey:@"name"];
+            }
+            
+            NSMutableArray* segments = [[[NSMutableArray alloc] init] autorelease];
+            for(NSDictionary* primary in primaries)
+            {
+                if(primary && [primary isKindOfClass:[NSDictionary class]])
+                {
+                    NSString* type = [primary objectForKey:@"type"];
+                    if(NO == [type isEqualToString:@"headword"])//只取headword
+                        continue;
+                    
+                    NSMutableDictionary* segment = [[[NSMutableDictionary alloc] init] autorelease];
+                    NSArray* terms = [primary objectForKey:@"terms"];
+                    if(terms && [terms isKindOfClass:[NSArray class]])
+                    {
+                        for(NSDictionary* term in terms)
+                        {
+                            NSString* type = [term objectForKey:@"type"];
+                            if([type isEqualToString:@"text"])
+                            {
+                                NSString* text = [term objectForKey:@"text"];
+                                if([text length])
+                                {
+                                    [segment setObject:text forKey:@"text"];
+                                    
+                                    NSArray* labels = [term objectForKey:@"labels"];
+                                    if(labels && [labels isKindOfClass:[NSArray class]])
+                                    {
+                                        if([labels count])
+                                        {
+                                            NSDictionary* label = [labels objectAtIndex:0];
+                                            if(label && [label isKindOfClass:[NSDictionary class]])
+                                            {
+                                                NSString* cixing = [label objectForKey:@"text"];
+                                                if([cixing length])
+                                                {
+                                                    [segment setObject:[cixing lowercaseString] forKey:@"cixing"];
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else if([type isEqualToString:@"phonetic"])
+                            {
+                                NSString* phonetic = [term objectForKey:@"text"];//音标
+                                if([phonetic length])
+                                {
+                                    [segment setObject:phonetic forKey:@"phonetic"];
+                                }
+                            }
+                            else if([type isEqualToString:@"sound"])
+                            {
+                                NSString* sound = [term objectForKey:@"text"];//声音
+                                if([sound length])
+                                {
+                                    [segment setObject:sound forKey:@"sound"];
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+                    NSArray* entries = [primary objectForKey:@"entries"];
+                    if(entries && [entries isKindOfClass:[NSArray class]])
+                    {
+                        NSMutableArray* sentences = [[[NSMutableArray alloc] init] autorelease];
+                        for(NSDictionary* entry in entries)
+                        {
+                            NSString* type = [entry objectForKey:@"type"];
+                            if([type isEqualToString:@"meaning"])
+                            {
+                                NSMutableDictionary* sentence = [[[NSMutableDictionary alloc] init] autorelease];
+                                NSArray* terms = [entry objectForKey:@"terms"];
+                                if(terms && [terms isKindOfClass:[NSArray class]])
+                                {
+                                    for(NSDictionary* term in terms)
+                                    {
+                                        NSString* type = [term objectForKey:@"type"];
+                                        if([type isEqualToString:@"text"])
+                                        {
+                                            NSString* text = [term objectForKey:@"text"];
+                                            if([text length])
+                                            {
+                                                [sentence setObject:text forKey:@"text"];
+                                                [sentences addObject:sentence];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                        
+                        [segment setObject:sentences forKey:@"sentences"];
+                    }
+                    
+                    [segments addObject:segment];
+                }
+            }
+
+            [word setObject:segments forKey:@"segments"];
+        }
+        
+        NSLog(@"word:%@",word);
+        
+        return word;
+        
+
+	}
+	
+	[sbjson release];
+	return nil;
 }
 
 #pragma mark - Network
@@ -529,6 +792,12 @@ static int g_reachabilityType = -1;
     
     [[NSUserDefaults standardUserDefaults] setObject:language forKey:@"left_language"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"set_left_language"
+                         withLabel:language
+                         withValue:nil];
 }
 
 + (NSString*)getLeftLanguage
@@ -547,6 +816,12 @@ static int g_reachabilityType = -1;
     
     [[NSUserDefaults standardUserDefaults] setObject:language forKey:@"right_language"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"set_right_language"
+                         withLabel:language
+                         withValue:nil];
 }
 
 + (NSString*)getRightLanguage
@@ -555,7 +830,7 @@ static int g_reachabilityType = -1;
     if([rightLanguage length])
         return rightLanguage;
     
-    return @"zh-CN";
+    return @"es";
 }
 
 + (void)setDetectEnd:(BOOL)b
@@ -563,6 +838,12 @@ static int g_reachabilityType = -1;
     NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
     [temp setBool:b forKey:@"SWT_DETECTEND"];
     [temp synchronize];
+    
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"set_detect"
+                         withLabel:nil
+                         withValue:[NSNumber numberWithBool:b]];
 }
 
 + (BOOL)getDectectEnd
@@ -580,6 +861,12 @@ static int g_reachabilityType = -1;
     NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
     [temp setBool:b forKey:@"SWT_AUTOSPEAK"];
     [temp synchronize];
+    
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker sendEventWithCategory:@"Action"
+                        withAction:@"set_autospeak"
+                         withLabel:nil
+                         withValue:[NSNumber numberWithBool:b]];
 }
 
 + (BOOL)getAutoSpeak
@@ -592,7 +879,7 @@ static int g_reachabilityType = -1;
     return YES;
 }
 
-+ (BOOL)setShowHintMask:(BOOL)b
++ (void)setShowHintMask:(BOOL)b
 {
     NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
     [temp setBool:b forKey:@"showHintMask"];
@@ -607,6 +894,57 @@ static int g_reachabilityType = -1;
         return [b boolValue];
     
     return YES;
+}
+
++ (void)setShowTipLabel:(BOOL)b
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    [temp setBool:b forKey:@"showTipLabel"];
+    [temp synchronize];
+}
+
++ (BOOL)getShowTipLabel
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    NSNumber* b = [temp objectForKey:@"showTipLabel"];
+    if(b)
+        return [b boolValue];
+    
+    return YES;
+}
+
++ (void)setVolume:(CGFloat)volume
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    [temp setFloat:volume forKey:@"volume"];
+    [temp synchronize];
+}
+
++ (CGFloat)getVolume
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    NSNumber* value = [temp objectForKey:@"volume"];
+    if(value)
+        return [value floatValue];
+    
+    return 1.0;
+}
+
++ (void)setSpeed:(CGFloat)speed
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    [temp setFloat:speed forKey:@"speed"];
+    [temp synchronize];
+}
+
++ (CGFloat)getSpeed
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    NSNumber* value = [temp objectForKey:@"speed"];
+    if(value)
+        return [value floatValue];
+    
+    return 1.0;
 }
 
 #pragma mark - 解析数据
@@ -703,7 +1041,7 @@ static int g_reachabilityType = -1;
 + (void)playTTS:(NSString*)ttsUrl
 {
     NSString* ttsPath = nil;
-    if([ttsUrl hasPrefix:@"http"])
+    if([ttsUrl hasPrefix:@"http"] || [ttsUrl hasPrefix:@"https"])
         ttsPath = [RCTool getTTSPath:ttsUrl];
     else
         ttsPath = ttsUrl;
@@ -721,17 +1059,21 @@ static int g_reachabilityType = -1;
             
             //[_mp3Player stop];
             mp3Player.delegate = nil;
-            mp3Player.volume = 1.0;
+            mp3Player.volume = [RCTool getVolume];
+            
+            if([RCTool systemVersion] >= 5.0)
+            {
+                mp3Player.enableRate = YES;
+                mp3Player.rate = [RCTool getSpeed];
+            }
+            
             [mp3Player prepareToPlay];
             [mp3Player play];
         }
         
         
     }
-//    else if([ttsUrl hasPrefix:@"http"])
-//    {
-//
-//    }
+
 }
 
 #pragma mark - Languages
@@ -743,7 +1085,7 @@ static int g_reachabilityType = -1;
     
     NSArray* languages = nil;
     if(nil == languages)
-        languages = [RCTool getLanguages];
+        languages = [RCTool getLanguages:NO];
     
     for(NSDictionary* language in languages)
     {
@@ -757,11 +1099,27 @@ static int g_reachabilityType = -1;
     return nil;
 }
 
-+ (NSArray*)getLanguages
++ (NSArray*)getLanguages:(BOOL)needSort
 {
     NSString* path = [[NSBundle mainBundle] pathForResource:@"languages" ofType:@"plist"];
     
-    return [NSArray arrayWithContentsOfFile:path];
+    NSArray* array = [NSArray arrayWithContentsOfFile:path];
+    if([array count] && needSort)
+    {
+        array = [array sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            
+            NSDictionary* language1 = (NSDictionary*)obj1;
+            NSDictionary* language2 = (NSDictionary*)obj2;
+            
+            NSString* name1 = [language1 objectForKey:@"name"];
+            NSString* name2 = [language2 objectForKey:@"name"];
+
+            return [name1 compare:name2];
+            
+        }];
+    }
+    
+    return array;
 }
 
 @end

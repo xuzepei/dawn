@@ -79,12 +79,18 @@
     if(CLT_LEFT == type)
     {
         bubbleImage = [UIImage imageNamed:@"lbf_0"];
-        bubbleImage = [bubbleImage resizableImageWithCapInsets:UIEdgeInsetsMake(14, 18, 15, 45)];
+        if([RCTool systemVersion] >= 6.0)
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
+        else
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS];
     }
     else if(CLT_RIGHT == type)
     {
         bubbleImage = [UIImage imageNamed:@"rbf_0"];
-        bubbleImage = [bubbleImage resizableImageWithCapInsets:UIEdgeInsetsMake(14, 18, 15, 45)];
+        if([RCTool systemVersion] >= 6.0)
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
+        else
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS];
         
         bubble_x = self.bounds.size.width - fromBubbleSize.width - OFFSET_X;
         alignment = NSTextAlignmentRight;
@@ -153,7 +159,11 @@
         }
         
         bubbleImage = [UIImage imageNamed:@"bt_0"];
-        bubbleImage = [bubbleImage resizableImageWithCapInsets:UIEdgeInsetsMake(14, 18, 15, 45)];
+        
+        if([RCTool systemVersion] >= 6.0)
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
+        else
+            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS];
         
         CGRect toBubbleFrame = CGRectMake(bubble_x, marginTop + fromBubbleSize.height + BUBBLE_FROM_TO_INTERVAL, toBubbleSize.width, toBubbleSize.height);
         _toBubbleRect = toBubbleFrame;

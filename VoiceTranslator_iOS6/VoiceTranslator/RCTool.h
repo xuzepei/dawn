@@ -23,6 +23,9 @@
 + (void)playSound:(NSString*)filename;
 + (UIImage*)createImage:(NSString*)imageName;
 
++ (NSString*)createBody:(NSDictionary*)dict;
++ (NSDictionary*)parseToDetail:(NSString*)jsonString;
+
 #pragma mark - Network
 
 + (void)setReachabilityType:(int)type;
@@ -86,8 +89,18 @@
 + (void)setAutoSpeak:(BOOL)b;
 + (BOOL)getAutoSpeak;
 
-+ (BOOL)setShowHintMask:(BOOL)b;
++ (void)setShowHintMask:(BOOL)b;
 + (BOOL)getShowHintMask;
+
++ (void)setShowTipLabel:(BOOL)b;
++ (BOOL)getShowTipLabel;
+
++ (void)setVolume:(CGFloat)volume;
++ (CGFloat)getVolume;
+
++ (void)setSpeed:(CGFloat)speed;
++ (CGFloat)getSpeed;
+
 
 
 #pragma mark - 解析数据
@@ -105,6 +118,6 @@
 #pragma mark - Languages
 
 + (NSDictionary*)getLangaugeByCode:(NSString*)code;
-+ (NSArray*)getLanguages;
++ (NSArray*)getLanguages:(BOOL)needSort;
 
 @end

@@ -128,5 +128,47 @@
 		<key>code</key>
 		<string>af</string>
 	</dict>
+	<dict>
+		<key>name</key>
+		<string>Greek</string>
+		<key>code</key>
+		<string>el</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Norwegian</string>
+		<key>code</key>
+		<string>no</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Danish</string>
+		<key>code</key>
+		<string>da</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Catalan</string>
+		<key>code</key>
+		<string>ca</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Slovak</string>
+		<key>code</key>
+		<string>sk</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Thai</string>
+		<key>code</key>
+		<string>th</string>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Romanian</string>
+		<key>code</key>
+		<string>ro</string>
+	</dict>
 </array>
 </plist>
