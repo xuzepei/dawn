@@ -7,6 +7,7 @@
 //
 
 #import "RCEditView.h"
+#import "RCTool.h"
 
 #define TEXTVIEW_RECT CGRectMake(12,6,292,114)
 #define BG_COLOR [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]
@@ -87,6 +88,12 @@
     if(_textView)
     {
         [_textView setText:self.translation.fromText];
+        
+        if([RCTool needSetTextRightAlignment:translation.fromCode])
+            _textView.textAlignment = NSTextAlignmentRight;
+        else
+            _textView.textAlignment = NSTextAlignmentLeft;
+        
         [_textView becomeFirstResponder];
     }
 }

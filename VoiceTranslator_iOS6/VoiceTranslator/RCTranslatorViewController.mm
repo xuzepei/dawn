@@ -28,6 +28,8 @@
 //#define BG_COLOR [UIColor colorWithRed:0.97 green:0.95 blue:0.95 alpha:1.00]
 #define BG_COLOR [UIColor whiteColor]
 
+#define AD_HEIGHT kGADAdSizeBanner.size.height
+
 @interface RCTranslatorViewController ()
 
 @end
@@ -97,6 +99,7 @@
     self.loadingImageView = nil;
     
     self.tipLabel = nil;
+    self.bannerView = nil;
     
     [super dealloc];
 }
@@ -118,7 +121,7 @@
 	// Do any additional setup after loading the view.
     
     self.view.backgroundColor = BG_COLOR;
-    self.title = NSLocalizedString(@"Voice Translate", @"");
+    self.title = NSLocalizedString(@"Bubble Translate", @"");
     
     [self.navigationController.navigationBar addSubview:_settingButton];
 
@@ -142,6 +145,8 @@
         
         [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
     }
+    
+    [self initAD];
 }
 
 - (void)didReceiveMemoryWarning
@@ -220,9 +225,9 @@
 {
     if(nil == _tableView)
     {
-        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
         if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-            height = [RCTool getScreenSize].height;
+            height = [RCTool getScreenSize].height - AD_HEIGHT;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStylePlain];
@@ -339,9 +344,9 @@
 
 - (void)initLevelMeter
 {
-    CGFloat y = [RCTool getScreenSize].height - 66 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+    CGFloat y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 66;
+        y = [RCTool getScreenSize].height - 62 - AD_HEIGHT;
     
     if(nil == _leftLevelMeter)
     {
@@ -414,9 +419,9 @@
 //    RCMaskView* maskView = [[[RCMaskView alloc] initWithFrame:CGRectMake(0, [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - RECORD_BUTTON_HEIGHT - 20 , [RCTool getScreenSize].width, RECORD_BUTTON_HEIGHT + 20)] autorelease];
 //    [self.view addSubview: maskView];
     
-    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 10;
+    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - AD_HEIGHT;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 10;
+        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - AD_HEIGHT;
     
     if(nil == _firstRecordButton)
     {
@@ -1462,9 +1467,9 @@
     
     [RCTool setShowTipLabel:NO];
     
-    CGFloat y = [RCTool getScreenSize].height - 86 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+    CGFloat y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 86;
+        y = [RCTool getScreenSize].height - 82 - AD_HEIGHT;
     
     if(nil == _tipLabel)
     {
@@ -1549,6 +1554,50 @@
             _editView.alpha = 0.0;
         }];
     }
+}
+
+#pragma mark - AD
+
+- (void)initAD
+{
+    // Create a view of the standard size at the top of the screen.
+    // Available AdSize constants are explained in GADAdSize.h.
+    if(nil == _bannerView)
+    {
+        _bannerView = [[GADBannerView alloc] initWithAdSize:kGADAdSizeBanner];
+        
+        _bannerView.adUnitID = AD_ID;
+        _bannerView.rootViewController = self;
+        _bannerView.delegate = self;
+    }
+    
+
+    [self.view addSubview:_bannerView];
+    
+    [self updateAd:nil];
+}
+
+- (void)updateAd:(id)argument
+{
+    // Initiate a generic request to load it with an ad.
+    [_bannerView loadRequest:[GADRequest request]];
+}
+
+- (void)adViewDidReceiveAd:(GADBannerView *)bannerView
+{
+    [UIView beginAnimations:@"BannerSlide" context:nil];
+    bannerView.frame = CGRectMake(0.0,
+                                  self.view.frame.size.height -
+                                  bannerView.frame.size.height,
+                                  bannerView.frame.size.width,
+                                  bannerView.frame.size.height);
+    [UIView commitAnimations];
+}
+
+- (void)adView:(GADBannerView *)bannerView
+didFailToReceiveAdWithError:(GADRequestError *)error
+{
+    [self performSelector:@selector(updateAd:) withObject:nil afterDelay:20];
 }
 
 @end

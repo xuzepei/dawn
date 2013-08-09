@@ -20,11 +20,12 @@
 #import <Accounts/Accounts.h>
 #import <MessageUI/MessageUI.h>
 #import <MessageUI/MFMailComposeViewController.h>
+#import "GADBannerView.h"
 
 @class RCRecordController;
 @class AQLevelMeter;
 
-@interface RCTranslatorViewController : UIViewController<AVAudioPlayerDelegate,UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,UIActionSheetDelegate,MFMailComposeViewControllerDelegate,MFMessageComposeViewControllerDelegate>
+@interface RCTranslatorViewController : UIViewController<AVAudioPlayerDelegate,UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,UIActionSheetDelegate,MFMailComposeViewControllerDelegate,MFMessageComposeViewControllerDelegate,GADBannerViewDelegate>
 
 @property(nonatomic,retain)WRTitleBar* titleBar;
 @property(nonatomic,strong)RCRecordController* recordController;
@@ -46,6 +47,7 @@
 @property(nonatomic,retain)RCMagnifyView* magnifyView;
 @property(nonatomic,retain)UIImageView* loadingImageView;
 @property(nonatomic,retain)UILabel* tipLabel;
+@property(nonatomic,retain)GADBannerView* bannerView;
 
 
 @end

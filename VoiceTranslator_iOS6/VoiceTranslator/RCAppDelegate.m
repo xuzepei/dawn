@@ -39,7 +39,11 @@
     // Optional: set debug to YES for extra debugging information.
     //[GAI sharedInstance].debug = YES;
     // Create tracker instance.
-    [[GAI sharedInstance] trackerWithTrackingId:GOOGLE_TRACKING_ID];
+    
+    #ifndef DEBUG
+        [[GAI sharedInstance] trackerWithTrackingId:GOOGLE_TRACKING_ID];
+    #endif
+    
 
     
     [application setApplicationIconBadgeNumber:0];

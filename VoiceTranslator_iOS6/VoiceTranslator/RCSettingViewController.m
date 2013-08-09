@@ -414,7 +414,7 @@ typedef enum {
             
             
             NSMutableString* subject = [[[NSMutableString alloc] init] autorelease];
-            [subject appendString:@"Feedback from Voice Translate "];
+            [subject appendString:@"Feedback from Bubble Translate "];
             [subject appendFormat:@"%.2f",APP_VERSION];
             [subject appendFormat:@", iOS %.2f",[RCTool systemVersion]];
             

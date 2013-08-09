@@ -83,6 +83,9 @@
             bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
         else
             bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS];
+        
+        if([RCTool needSetTextRightAlignment:_translation.fromCode])
+            alignment = NSTextAlignmentRight;
     }
     else if(CLT_RIGHT == type)
     {
@@ -141,6 +144,7 @@
     }
     
     //To
+    alignment = NSTextAlignmentLeft;
     NSString* toText = _translation.toText;
     if([toText length])
     {
@@ -150,6 +154,8 @@
         CGFloat text_x = BUBBLE_PADDING_RIGHT; //文字的起点X坐标
         if(CLT_LEFT == type)
         {
+            if([RCTool needSetTextRightAlignment:_translation.toCode])
+                alignment = NSTextAlignmentRight;
         }
         else if(CLT_RIGHT == type)
         {

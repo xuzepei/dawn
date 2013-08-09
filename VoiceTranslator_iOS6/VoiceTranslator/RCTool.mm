@@ -1122,4 +1122,15 @@ static int g_reachabilityType = -1;
     return array;
 }
 
++ (BOOL)needSetTextRightAlignment:(NSString*)code
+{
+    // ARABIC      阿拉伯语	@"ar"
+    // HEBREW      希伯来语    @"iw"
+	if([code isEqualToString:@"ar"] || [code isEqualToString:@"iw"]
+	   || [code isEqualToString:@"fa"] || [code isEqualToString:@"yi"])
+		return YES;
+	else
+		return NO;
+}
+
 @end

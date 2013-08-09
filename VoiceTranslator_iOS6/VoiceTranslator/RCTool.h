@@ -119,5 +119,6 @@
 
 + (NSDictionary*)getLangaugeByCode:(NSString*)code;
 + (NSArray*)getLanguages:(BOOL)needSort;
++ (BOOL)needSetTextRightAlignment:(NSString*)code;
 
 @end
