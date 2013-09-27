@@ -48,6 +48,7 @@
 @property(nonatomic,retain)UIImageView* loadingImageView;
 @property(nonatomic,retain)UILabel* tipLabel;
 @property(nonatomic,retain)GADBannerView* bannerView;
+@property(assign)CGFloat adHeight;
 
 
 @end

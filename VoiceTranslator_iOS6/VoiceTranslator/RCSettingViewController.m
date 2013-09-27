@@ -14,12 +14,15 @@
 #import "RCSliderCell.h"
 
 #define CLEAR_TAG 200
+#define PURCHASE_TAG 201
+#define REMOVE_AD_ID @"20130817"
 
 typedef enum {
     ST_LANGUAGE = 0,
 	ST_VOICE,
     ST_VOLUME,
     ST_CLEANUP,
+    ST_PURCHASE,
     ST_HELP,
 }SettingType;
 
@@ -50,8 +53,11 @@ typedef enum {
 {
     NSLog(@"%s",__FUNCTION__);
     
+    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+    
     self.tableView = nil;
     self.itemArray = nil;
+    self.products = nil;
     
     [super dealloc];
 }
@@ -62,6 +68,9 @@ typedef enum {
     
     if(_tableView)
         [_tableView reloadData];
+    
+    if([self checkEnableIAP] && nil == self.removeAdProduct)
+        [self requestProductData];
 }
 
 - (void)viewDidLoad
@@ -70,6 +79,12 @@ typedef enum {
 	// Do any additional setup after loading the view.
     
     [self initTableView];
+    
+    if([self checkEnableIAP])
+    {
+        [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+        [self requestProductData];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -107,7 +122,7 @@ typedef enum {
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 5;
+	return 6;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -128,6 +143,10 @@ typedef enum {
 	{
 		return NSLocalizedString(@"Clear", @"");
 	}
+    else if(ST_PURCHASE == section)
+	{
+		return NSLocalizedString(@"Purchase", @"");
+	}
     else if(ST_HELP == section)
     {
         return NSLocalizedString(@"Help", @"");
@@ -146,6 +165,8 @@ typedef enum {
     else if(ST_VOLUME == section)
 		return 2;
 	else if(ST_CLEANUP == section)
+		return 1;
+    else if(ST_PURCHASE == section)
 		return 1;
     else if(ST_HELP == section)
 		return 2;
@@ -168,6 +189,7 @@ typedef enum {
 	static NSString *cellId4 = @"cellId4";
     static NSString *cellId5 = @"cellId5";
     static NSString *cellId6 = @"cellId6";
+    static NSString *cellId7 = @"cellId7";
 	
 	UITableViewCell *cell = nil;
 	if(ST_LANGUAGE == indexPath.section)
@@ -279,6 +301,27 @@ typedef enum {
             cell.textLabel.text = NSLocalizedString(@"Clear History",@"");
         }
 	}
+    else if(ST_PURCHASE == indexPath.section)
+	{
+        cell = [tableView dequeueReusableCellWithIdentifier:cellId7];
+        if (cell == nil)
+        {
+            cell = [[[UITableViewCell alloc] initWithStyle: UITableViewCellStyleDefault
+                                           reuseIdentifier: cellId7] autorelease];
+            cell.accessoryType = UITableViewCellAccessoryNone;
+            
+            if(self.removeAdProduct)
+            {
+                cell.textLabel.text = self.removeAdProduct.localizedTitle;
+            }
+            else
+            {
+                cell.textLabel.text = NSLocalizedString(@"Remove Advertisement",@"");
+            }
+            
+            cell.imageView.image = [UIImage imageNamed:@"adblock"];
+        }
+	}
     else if(ST_HELP == indexPath.section)
 	{
         cell = [tableView dequeueReusableCellWithIdentifier:cellId5];
@@ -337,8 +380,19 @@ typedef enum {
         actionSheet.tag = CLEAR_TAG;
         actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
         [actionSheet showInView:self.view];
-        //[actionSheet release];
         
+    }
+    else if(ST_PURCHASE == indexPath.section)
+    {
+        UIActionSheet *actionSheet = [[[UIActionSheet alloc] initWithTitle:@"Remove Advertisement"
+                                                                  delegate:self
+                                                         cancelButtonTitle:@"Cancel"
+                                                    destructiveButtonTitle:nil
+                                                         otherButtonTitles:@"Purchase",@"Restore Previous Purchase",nil]autorelease];
+        actionSheet.delegate = self;
+        actionSheet.tag = PURCHASE_TAG;
+        actionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+        [actionSheet showInView:self.view];
     }
     else if(ST_HELP == indexPath.section)
     {
@@ -386,6 +440,17 @@ typedef enum {
             [RCTool deleteOldData];
         }
     }
+    else if(PURCHASE_TAG == actionSheet.tag)
+    {
+        if(0 == buttonIndex)
+        {
+            [self buyProduct:self.removeAdProduct];
+        }
+        else
+        {
+            [self restoreProduct];
+        }
+    }
 }
 
 - (void)actionSheetCancel:(UIActionSheet *)actionSheet
@@ -414,8 +479,8 @@ typedef enum {
             
             
             NSMutableString* subject = [[[NSMutableString alloc] init] autorelease];
-            [subject appendString:@"Feedback from Bubble Translate "];
-            [subject appendFormat:@"%.2f",APP_VERSION];
+            [subject appendString:@"Feedback from iTranslate 2"];
+            [subject appendFormat:@", v%.2f",APP_VERSION];
             [subject appendFormat:@", iOS %.2f",[RCTool systemVersion]];
             
             [subject appendFormat:@", device type %d",UI_USER_INTERFACE_IDIOM()];
@@ -445,5 +510,181 @@ typedef enum {
         [RCTool showAlert:@"Hint" message:@"Send email successfully."];
     }
 }
+
+#pragma mark - In App Purchase
+
+- (BOOL)checkEnableIAP
+{
+    if([SKPaymentQueue canMakePayments])
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)requestProductData
+{
+    SKProductsRequest *request= [[[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObjects:REMOVE_AD_ID,nil]] autorelease];
+    request.delegate = self;
+    [request start];
+}
+
+- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
+{
+    self.products = response.products;
+    
+    for(SKProduct* product in self.products)
+    {
+        if([product.productIdentifier isEqualToString:REMOVE_AD_ID])
+        {
+            self.removeAdProduct = product;
+            break;
+        }
+    }
+    
+    [self.tableView reloadData];
+}
+
+- (void)buyProduct:(SKProduct*)product
+{
+    if(self.isPaying)
+        return;
+    
+    if(nil == product)
+    {
+        if([self checkEnableIAP] && nil == self.removeAdProduct)
+            [self requestProductData];
+        
+        [RCTool showAlert:@"Hint" message:@"No product for purchase!"];
+        return;
+    }
+    
+    if(NO == [self checkEnableIAP])
+    {
+        [RCTool showAlert:@"Hint" message:@"Please enable In-App Purchase first!"];
+        return;
+    }
+    
+    //[RCTool showIndicator:@"Loading..." view:self.view];
+    self.isPaying = YES;
+
+    SKPayment *payment = [SKPayment paymentWithProduct:product];
+    [[SKPaymentQueue defaultQueue] addPayment:payment];
+}
+
+- (void)restoreProduct
+{
+    if(self.isPaying)
+        return;
+    
+    self.isPaying = YES;
+    
+    [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
+}
+
+- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
+{
+    self.isPaying = NO;
+    NSLog(@"paymentQueueRestoreCompletedTransactionsFinished");
+}
+
+- (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
+{
+    self.isPaying = NO;
+    NSLog(@"restoreCompletedTransactionsFailedWithError");
+}
+
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
+{
+    for (SKPaymentTransaction *transaction in transactions)
+    {
+        switch (transaction.transactionState)
+        {
+            case SKPaymentTransactionStatePurchased:
+                [self completeTransaction:transaction];
+                break;
+            case SKPaymentTransactionStateFailed:
+                [self failedTransaction:transaction];
+                break;
+            case SKPaymentTransactionStateRestored:
+                [self restoreTransaction:transaction];
+                break;
+            case SKPaymentTransactionStatePurchasing:
+            {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
+- (void)completeTransaction:(SKPaymentTransaction *)transaction
+{
+    NSLog(@"completeTransaction");
+    
+    self.isPaying = NO;
+    [RCTool hideIndicator:self.view];
+    
+    if(transaction.transactionState == SKPaymentTransactionStatePurchased)
+    {
+        if(transaction.transactionReceipt)
+        {
+            if([transaction.payment.productIdentifier isEqualToString:REMOVE_AD_ID])
+            {
+                NSDate* date = [NSDate date];
+                NSTimeInterval now = [date timeIntervalSince1970];
+                NSTimeInterval transactionDateTimeInterval = [transaction.transactionDate timeIntervalSince1970];
+                
+                NSTimeInterval temp = now - transactionDateTimeInterval;
+                if(temp && temp < 1*7*24*60*60)
+                {
+                    [RCTool setRemoveAD:YES];
+                    [RCTool showAlert:@"Purchase Successfully" message:@"The advertisement has been removed."];
+                }
+            }
+        }
+    }
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
+}
+
+- (void)restoreTransaction: (SKPaymentTransaction *)transaction
+{
+    NSLog(@"restoreTransaction");
+    
+    self.isPaying = NO;
+    [RCTool hideIndicator:self.view];
+    
+    if([transaction.payment.productIdentifier isEqualToString:REMOVE_AD_ID])
+    {
+        [RCTool setRemoveAD:YES];
+        [RCTool showAlert:@"Restore Purchase Successfully" message:@"The advertisement has been removed."];
+    }
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
+}
+
+- (void) failedTransaction:(SKPaymentTransaction *)transaction
+{
+    NSLog(@"failedTransaction");
+    
+    self.isPaying = NO;
+    [RCTool hideIndicator:self.view];
+    
+    if(transaction.error.code != SKErrorPaymentCancelled){
+        // Optionally, display an error here.
+        
+        NSString* temp = [NSString stringWithFormat:@"%@",[transaction.error localizedDescription]];
+        [RCTool showAlert:@"Payment Failed" message:temp];
+    }
+    
+    NSLog(@"transaction.error.code:%d",transaction.error.code);
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
+    
+}
+
 
 @end

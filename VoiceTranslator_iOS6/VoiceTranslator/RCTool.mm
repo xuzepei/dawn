@@ -15,6 +15,7 @@
 #import "ASIHTTPRequest.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import "NSString+HTML.h"
+#import "MBProgressHUD.h"
 
 static SystemSoundID g_soundID = 0;
 
@@ -462,6 +463,47 @@ static int g_reachabilityType = -1;
 	
 	[sbjson release];
 	return nil;
+}
+
++ (void)showIndicator:(NSString*)text view:(UIView*)addedToView
+{
+    if(nil == addedToView)
+        addedToView = [RCTool frontWindow];
+    
+    MBProgressHUD * indicator = [MBProgressHUD showHUDAddedTo:addedToView animated:YES];
+    indicator.labelText = text;
+}
+
++ (void)hideIndicator:(UIView*)addedToView
+{
+    if(nil == addedToView)
+        addedToView = [RCTool frontWindow];
+    
+    [MBProgressHUD hideHUDForView:addedToView animated:YES];
+}
+
+#pragma mark In-App Purchase
+
++ (void)setRemoveAD:(BOOL)b
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    [temp setBool:b forKey:@"RemoveAD"];
+    [temp synchronize];
+    
+    if(b)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:REMOVE_AD_NOTIFICATION object:nil];
+    }
+}
+
++ (BOOL)isRemoveAD
+{
+    NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
+    NSNumber* b = [temp objectForKey:@"RemoveAD"];
+    if(b)
+        return [b boolValue];
+    
+    return NO;
 }
 
 #pragma mark - Network

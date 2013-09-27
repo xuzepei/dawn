@@ -26,6 +26,14 @@
 + (NSString*)createBody:(NSDictionary*)dict;
 + (NSDictionary*)parseToDetail:(NSString*)jsonString;
 
++ (void)showIndicator:(NSString*)text view:(UIView*)addedToView;
++ (void)hideIndicator:(UIView*)addedToView;
+
+#pragma mark In-App Purchase
+
++ (void)setRemoveAD:(BOOL)b;
++ (BOOL)isRemoveAD;
+
 #pragma mark - Network
 
 + (void)setReachabilityType:(int)type;

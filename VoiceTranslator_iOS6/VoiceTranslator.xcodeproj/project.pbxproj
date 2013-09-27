@@ -122,6 +122,7 @@
 		095317BA178561BA006756BE /* record_begin.wav in Resources */ = {isa = PBXBuildFile; fileRef = 095317B8178561AA006756BE /* record_begin.wav */; };
 		095317BB178561BA006756BE /* record_end.wav in Resources */ = {isa = PBXBuildFile; fileRef = 095317B9178561AA006756BE /* record_end.wav */; };
 		095317BF1785734D006756BE /* RCSliderCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 095317BD17857011006756BE /* RCSliderCell.m */; };
+		095F6CC617D48C380003E09E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 095F6CC517D48C380003E09E /* Images.xcassets */; };
 		096112E617990E0B005A6BEE /* flag_fa@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 096112E417990D9F005A6BEE /* flag_fa@2x.png */; };
 		096112E717990E0B005A6BEE /* round_flag_fa@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 096112E517990DA6005A6BEE /* round_flag_fa@2x.png */; };
 		0963D9A417885C7E00EBF862 /* libGoogleAnalytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0963D9A217885C7E00EBF862 /* libGoogleAnalytics.a */; };
@@ -140,6 +141,7 @@
 		099C2E03177002C20068AC31 /* RCSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 099C2E02177002C20068AC31 /* RCSettingViewController.m */; };
 		099C2E0517700D8B0068AC31 /* languages.plist in Resources */ = {isa = PBXBuildFile; fileRef = 099C2E0417700D8B0068AC31 /* languages.plist */; };
 		099C2E33177039770068AC31 /* RCSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 099C2E32177039770068AC31 /* RCSwitchCell.m */; };
+		09A1FE7A17BF16D8003BF08D /* adblock@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 09A1FE7917BF16D8003BF08D /* adblock@2x.png */; };
 		09C6A9821786A92A003AEB25 /* NSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = 09C6A9811786A92A003AEB25 /* NSString+HTML.m */; };
 		09C6A9851786A942003AEB25 /* GTMNSString+HTML.m in Sources */ = {isa = PBXBuildFile; fileRef = 09C6A9841786A942003AEB25 /* GTMNSString+HTML.m */; };
 		09E3F97717852B7800E3FCD2 /* flag_ca@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 09E3F96B1785284800E3FCD2 /* flag_ca@2x.png */; };
@@ -336,6 +338,7 @@
 		095317B9178561AA006756BE /* record_end.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = record_end.wav; sourceTree = "<group>"; };
 		095317BC17857011006756BE /* RCSliderCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCSliderCell.h; sourceTree = "<group>"; };
 		095317BD17857011006756BE /* RCSliderCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCSliderCell.m; sourceTree = "<group>"; };
+		095F6CC517D48C380003E09E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		096112E417990D9F005A6BEE /* flag_fa@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flag_fa@2x.png"; sourceTree = "<group>"; };
 		096112E517990DA6005A6BEE /* round_flag_fa@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "round_flag_fa@2x.png"; sourceTree = "<group>"; };
 		0963D99D17885C7E00EBF862 /* GAI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GAI.h; sourceTree = "<group>"; };
@@ -376,6 +379,7 @@
 		099C2E0417700D8B0068AC31 /* languages.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = languages.plist; sourceTree = "<group>"; };
 		099C2E31177039770068AC31 /* RCSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCSwitchCell.h; sourceTree = "<group>"; };
 		099C2E32177039770068AC31 /* RCSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCSwitchCell.m; sourceTree = "<group>"; };
+		09A1FE7917BF16D8003BF08D /* adblock@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "adblock@2x.png"; sourceTree = "<group>"; };
 		09C6A9801786A92A003AEB25 /* NSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+HTML.h"; sourceTree = "<group>"; };
 		09C6A9811786A92A003AEB25 /* NSString+HTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+HTML.m"; sourceTree = "<group>"; };
 		09C6A9831786A942003AEB25 /* GTMNSString+HTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GTMNSString+HTML.h"; sourceTree = "<group>"; };
@@ -597,6 +601,7 @@
 		0942AA161743237800EE4674 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				09A1FE7917BF16D8003BF08D /* adblock@2x.png */,
 				09FCBCAA1787FB4D00C9DB38 /* speaker@2x.png */,
 				096888691781518400C77FD1 /* hint_mask@2x.png */,
 				0968886417813B3C00C77FD1 /* help@2x.png */,
@@ -703,6 +708,7 @@
 				0917AEB2177ED35C004D31EC /* RCMaskView.m */,
 				0968886617814AAB00C77FD1 /* RCHintMaskView.h */,
 				0968886717814AAB00C77FD1 /* RCHintMaskView.m */,
+				095F6CC517D48C380003E09E /* Images.xcassets */,
 			);
 			path = VoiceTranslator;
 			sourceTree = "<group>";
@@ -924,6 +930,11 @@
 				CLASSPREFIX = RC;
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = xuzepei;
+				TargetAttributes = {
+					0947319B164E2F1E0067C0ED = {
+						DevelopmentTeam = LM588XA4YS;
+					};
+				};
 			};
 			buildConfigurationList = 09473196164E2F1E0067C0ED /* Build configuration list for PBXProject "VoiceTranslator" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -983,6 +994,7 @@
 				091979BF17757DC200C38499 /* flag_fi@2x.png in Resources */,
 				091979C017757DC200C38499 /* flag_fr@2x.png in Resources */,
 				091979C117757DC200C38499 /* flag_hu@2x.png in Resources */,
+				095F6CC617D48C380003E09E /* Images.xcassets in Resources */,
 				091979C217757DC200C38499 /* flag_id@2x.png in Resources */,
 				091979C317757DC200C38499 /* flag_it@2x.png in Resources */,
 				091979C417757DC200C38499 /* flag_ja@2x.png in Resources */,
@@ -1038,6 +1050,7 @@
 				09FCBCA71787DFE100C9DB38 /* translate.css in Resources */,
 				09FCBCAB1787FB4D00C9DB38 /* speaker@2x.png in Resources */,
 				098228BC17B4B49800083C10 /* README.txt in Resources */,
+				09A1FE7A17BF16D8003BF08D /* adblock@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1177,14 +1190,16 @@
 		094731C0164E2F1E0067C0ED /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Sanguo Tech (GC6842RPZX)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VoiceTranslator/VoiceTranslator-Prefix.pch";
 				INFOPLIST_FILE = "VoiceTranslator/VoiceTranslator-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/VoiceTranslator/ThirdParty/Baidu/tongji\"",
@@ -1202,15 +1217,17 @@
 		094731C1164E2F1E0067C0ED /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "compiler-default";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Sanguo Tech (LM588XA4YS)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Sanguo Tech (LM588XA4YS)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VoiceTranslator/VoiceTranslator-Prefix.pch";
 				INFOPLIST_FILE = "VoiceTranslator/VoiceTranslator-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/VoiceTranslator/ThirdParty/Baidu/tongji\"",

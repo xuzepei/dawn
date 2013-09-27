@@ -53,6 +53,8 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearUpHistory:) name:CLEAR_UP_NOTIFICATION object:nil];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeAD:) name:REMOVE_AD_NOTIFICATION object:nil];
+        
         
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(keyboardWillShow:)
@@ -121,9 +123,14 @@
 	// Do any additional setup after loading the view.
     
     self.view.backgroundColor = BG_COLOR;
-    self.title = NSLocalizedString(@"Bubble Translate", @"");
+    self.title = NSLocalizedString(@"iTranslate 2", @"");
     
     [self.navigationController.navigationBar addSubview:_settingButton];
+    
+    if([RCTool isRemoveAD])
+        self.adHeight = 0.0;
+    else
+        self.adHeight = kGADAdSizeBanner.size.height;
 
     [self initTableView];
     
@@ -156,12 +163,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
     
-//    self.firstRecordButton = nil;
-//    self.secondRecordButton = nil;
-//    self.titleBar = nil;
-//    self.leftLevelMeter = nil;
-//    self.rightLevelMeter = nil;
-//    self.tableView = nil;
 }
 
 #pragma mark - NaviagionBar
@@ -225,9 +226,9 @@
 {
     if(nil == _tableView)
     {
-        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
+        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
         if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-            height = [RCTool getScreenSize].height - AD_HEIGHT;
+            height = [RCTool getScreenSize].height - self.adHeight;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStylePlain];
@@ -344,9 +345,9 @@
 
 - (void)initLevelMeter
 {
-    CGFloat y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
+    CGFloat y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 62 - AD_HEIGHT;
+        y = [RCTool getScreenSize].height - 62 - self.adHeight;
     
     if(nil == _leftLevelMeter)
     {
@@ -419,9 +420,9 @@
 //    RCMaskView* maskView = [[[RCMaskView alloc] initWithFrame:CGRectMake(0, [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - RECORD_BUTTON_HEIGHT - 20 , [RCTool getScreenSize].width, RECORD_BUTTON_HEIGHT + 20)] autorelease];
 //    [self.view addSubview: maskView];
     
-    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - AD_HEIGHT;
+    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - self.adHeight;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - AD_HEIGHT;
+        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - self.adHeight;
     
     if(nil == _firstRecordButton)
     {
@@ -943,9 +944,9 @@
 {
     if(nil == _loadingImageView)
     {
-        CGFloat y = [RCTool getScreenSize].height - 66 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+        CGFloat y = [RCTool getScreenSize].height - 16 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
         if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-            y = [RCTool getScreenSize].height - 66;
+            y = [RCTool getScreenSize].height - 16 - self.adHeight;
         
         _loadingImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 60, 11)];
         
@@ -1467,9 +1468,9 @@
     
     [RCTool setShowTipLabel:NO];
     
-    CGFloat y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - AD_HEIGHT;
+    CGFloat y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
     if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 82 - AD_HEIGHT;
+        y = [RCTool getScreenSize].height - 82 - self.adHeight;
     
     if(nil == _tipLabel)
     {
@@ -1580,7 +1581,8 @@
 - (void)updateAd:(id)argument
 {
     // Initiate a generic request to load it with an ad.
-    [_bannerView loadRequest:[GADRequest request]];
+    if(NO == [RCTool isRemoveAD])
+        [_bannerView loadRequest:[GADRequest request]];
 }
 
 - (void)adViewDidReceiveAd:(GADBannerView *)bannerView
@@ -1598,6 +1600,12 @@
 didFailToReceiveAdWithError:(GADRequestError *)error
 {
     [self performSelector:@selector(updateAd:) withObject:nil afterDelay:20];
+}
+
+- (void)removeAD:(NSNotification*)notification
+{
+    if(_bannerView)
+        [_bannerView removeFromSuperview];
 }
 
 @end
