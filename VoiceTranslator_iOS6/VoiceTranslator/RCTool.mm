@@ -8,6 +8,7 @@
 
 #import "RCTool.h"
 #import <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonCryptor.h>
 #import "Reachability.h"
 #import "RCAppDelegate.h"
 #import "SBJSON.h"
@@ -16,6 +17,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import "NSString+HTML.h"
 #import "MBProgressHUD.h"
+#import "GTMBase64.h"
 
 static SystemSoundID g_soundID = 0;
 
@@ -112,6 +114,31 @@ static int g_reachabilityType = -1;
         UIWindow *frontWindow = [windows objectAtIndex:i];
             return frontWindow;
     }
+    
+	return nil;
+}
+
++ (NSDictionary*)parseToDictionary:(NSString*)jsonString
+{
+    if(0 == [jsonString length])
+		return nil;
+    
+    
+	SBJSON* sbjson = [[SBJSON alloc] init];
+    
+    NSError* error = nil;
+	NSDictionary* dict = [sbjson objectWithString:jsonString error:&error];
+    
+    if(error)
+        NSLog(@"error:%@",[error description]);
+	
+	if(dict && [dict isKindOfClass:[NSDictionary class]])
+	{
+        [sbjson release];
+        return dict;
+	}
+	
+	[sbjson release];
     
 	return nil;
 }
@@ -834,12 +861,6 @@ static int g_reachabilityType = -1;
     
     [[NSUserDefaults standardUserDefaults] setObject:language forKey:@"left_language"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"set_left_language"
-                         withLabel:language
-                         withValue:nil];
 }
 
 + (NSString*)getLeftLanguage
@@ -858,12 +879,7 @@ static int g_reachabilityType = -1;
     
     [[NSUserDefaults standardUserDefaults] setObject:language forKey:@"right_language"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"set_right_language"
-                         withLabel:language
-                         withValue:nil];
+
 }
 
 + (NSString*)getRightLanguage
@@ -880,12 +896,7 @@ static int g_reachabilityType = -1;
     NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
     [temp setBool:b forKey:@"SWT_DETECTEND"];
     [temp synchronize];
-    
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"set_detect"
-                         withLabel:nil
-                         withValue:[NSNumber numberWithBool:b]];
+
 }
 
 + (BOOL)getDectectEnd
@@ -903,12 +914,7 @@ static int g_reachabilityType = -1;
     NSUserDefaults* temp = [NSUserDefaults standardUserDefaults];
     [temp setBool:b forKey:@"SWT_AUTOSPEAK"];
     [temp synchronize];
-    
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"set_autospeak"
-                         withLabel:nil
-                         withValue:[NSNumber numberWithBool:b]];
+
 }
 
 + (BOOL)getAutoSpeak
@@ -1174,5 +1180,171 @@ static int g_reachabilityType = -1;
 	else
 		return NO;
 }
+
+#pragma mark - App Info
+
++ (NSString*)getAdId
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        NSString* ad_id = [app_info objectForKey:@"ad_id"];
+        if([ad_id length])
+            return ad_id;
+    }
+    
+    return AD_ID;
+}
+
++ (NSString*)getScreenAdId
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        NSString* ad_id = [app_info objectForKey:@"mediation_id"];
+        if(0 == [ad_id length])
+            ad_id = [app_info objectForKey:@"screen_ad_id"];
+        
+        if([ad_id length])
+            return ad_id;
+    }
+    
+    return SCREEN_AD_ID;
+}
+
++ (int)getScreenAdRate
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        NSString* ad_rate = [app_info objectForKey:@"screen_ad_rate"];
+        if([ad_rate intValue] > 0)
+            return [ad_rate intValue];
+    }
+    
+    return SCREEN_AD_RATE;
+}
+
++ (NSString*)getAppURL
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        NSString* link = [app_info objectForKey:@"link"];
+        if([link length])
+            return link;
+    }
+    
+    return APP_URL;
+}
+
++ (BOOL)isOpenAll
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        NSString* openall = [app_info objectForKey:@"openall"];
+        if([openall isEqualToString:@"1"])
+            return YES;
+    }
+    else
+    {
+        NSDate* date = [[[NSDate alloc] initWithString:@"2014-04-1 12:06:04 +0800"] autorelease];
+        NSDate* startDate = [NSDate date];
+        
+        if([startDate timeIntervalSinceDate:date] >= 14*24*60*60)
+        {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
++ (UIView*)getAdView
+{
+	RCAppDelegate* appDelegate = (RCAppDelegate*)[[UIApplication sharedApplication] delegate];
+    
+    if(appDelegate.adMobAd.alpha)
+    {
+        UIView* adView = appDelegate.adMobAd;
+        if(adView)
+            return adView;
+    }
+	
+	return nil;
+}
+
++ (NSString*)decryptUseDES:(NSString*)cipherText key:(NSString*)key {
+    // 利用 GTMBase64 解碼 Base64 字串
+    NSData* cipherData = [GTMBase64 decodeString:cipherText];
+    unsigned char buffer[1024];
+    memset(buffer, 0, sizeof(char));
+    size_t numBytesDecrypted = 0;
+    
+    // IV 偏移量不需使用
+    CCCryptorStatus cryptStatus = CCCrypt(kCCDecrypt,
+                                          kCCAlgorithmDES,
+                                          kCCOptionPKCS7Padding | kCCOptionECBMode,
+                                          [key UTF8String],
+                                          kCCKeySizeDES,
+                                          nil,
+                                          [cipherData bytes],
+                                          [cipherData length],
+                                          buffer,
+                                          1024,
+                                          &numBytesDecrypted);
+    NSString* plainText = nil;
+    if (cryptStatus == kCCSuccess) {
+        NSData* data = [NSData dataWithBytes:buffer length:(NSUInteger)numBytesDecrypted];
+        plainText = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    }
+    return plainText;
+}
+
++ (NSString *)encryptUseDES:(NSString *)clearText key:(NSString *)key
+{
+    NSData *data = [clearText dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+    unsigned char buffer[1024];
+    memset(buffer, 0, sizeof(char));
+    size_t numBytesEncrypted = 0;
+    
+    CCCryptorStatus cryptStatus = CCCrypt(kCCEncrypt,
+                                          kCCAlgorithmDES,
+                                          kCCOptionPKCS7Padding | kCCOptionECBMode,
+                                          [key UTF8String],
+                                          kCCKeySizeDES,
+                                          nil,
+                                          [data bytes],
+                                          [data length],
+                                          buffer,
+                                          1024,
+                                          &numBytesEncrypted);
+    
+    NSString* plainText = nil;
+    if (cryptStatus == kCCSuccess) {
+        NSData *dataTemp = [NSData dataWithBytes:buffer length:(NSUInteger)numBytesEncrypted];
+        plainText = [GTMBase64 stringByEncodingData:dataTemp];
+    }else{
+        NSLog(@"DES加密失败");
+    }
+    return plainText;
+}
+
++ (NSString*)decrypt:(NSString*)text
+{
+    if(0 == [text length])
+        return @"";
+    
+    NSString* key = SECRET_KEY;
+    NSString* encrypt = text;
+    NSString* decrypt = [RCTool decryptUseDES:encrypt key:key];
+    
+    if([decrypt length])
+        return decrypt;
+    
+    return @"";
+}
+
 
 @end

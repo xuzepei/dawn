@@ -54,6 +54,7 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearUpHistory:) name:CLEAR_UP_NOTIFICATION object:nil];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeAD:) name:REMOVE_AD_NOTIFICATION object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAD:) name:ADD_AD_NOTIFICATION object:nil];
         
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -101,7 +102,6 @@
     self.loadingImageView = nil;
     
     self.tipLabel = nil;
-    self.bannerView = nil;
     
     [super dealloc];
 }
@@ -127,10 +127,11 @@
     
     [self.navigationController.navigationBar addSubview:_settingButton];
     
-    if([RCTool isRemoveAD])
-        self.adHeight = 0.0;
+    UIView* adView = [RCTool getAdView];
+    if(adView.superview)
+        self.adHeight = 50.0;
     else
-        self.adHeight = kGADAdSizeBanner.size.height;
+        self.adHeight = 0.0f;
 
     [self initTableView];
     
@@ -152,8 +153,6 @@
         
         [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
     }
-    
-    [self initAD];
 }
 
 - (void)didReceiveMemoryWarning
@@ -211,7 +210,9 @@
     UINavigationController* temp1 = [[UINavigationController alloc] initWithRootViewController:temp];
     temp1.navigationBar.tintColor = NAVIGATION_BAR_COLOR;
     [temp release];
-    [self presentModalViewController:temp1 animated:YES];
+    [self presentViewController:temp1 animated:YES completion:^{
+        
+    }];
     [temp1 release];
 }
 
@@ -626,12 +627,7 @@
 
 - (void)clickedFirstRecordButton:(id)token
 {
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"button_press"
-                         withLabel:@"left_record"
-                         withValue:nil];
-    
+
     NSDictionary* dict = (NSDictionary*)token;
     NSString* touchEvent = [dict objectForKey:@"touch_event"];
     NSString* fromLanguage = [dict objectForKey:@"language"];
@@ -646,12 +642,7 @@
 
 - (void)clickedSecondRecordButton:(id)token
 {
-    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-    [tracker sendEventWithCategory:@"Action"
-                        withAction:@"button_press"
-                         withLabel:@"right_record"
-                         withValue:nil];
-    
+ 
     NSDictionary* dict = (NSDictionary*)token;
     NSString* touchEvent = [dict objectForKey:@"touch_event"];
     NSString* fromLanguage = [dict objectForKey:@"language"];
@@ -923,7 +914,7 @@
     
     [RCTool saveCoreData];
     
-    NSString* errorString = NSLocalizedString(@"Translate Failed. Please check the internet connection.", @"");
+    NSString* errorString = NSLocalizedString(@"Sorry,translate failed.", @"");
     switch (errorType) {
         case ET_UTTERANCE:
             errorString = NSLocalizedString(@"I'm not sure what you said.", @"");
@@ -1026,12 +1017,7 @@
     
     if(AT_COPY == actionType)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"copy"
-                             withValue:nil];
-        
+    
         NSString* text = nil;
         if(BT_FROM == bubbleType)
             text = translation.fromText;
@@ -1042,12 +1028,7 @@
     }
     else if(AT_SPEAK == actionType)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"speak"
-                             withValue:nil];
-        
+
         if(BT_FROM == bubbleType)
         {
             if(0 == [translation.fromVoice length])
@@ -1066,12 +1047,7 @@
     }
     else if(AT_EDIT == actionType)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"edit"
-                             withValue:nil];
-        
+
         if(BT_FROM == bubbleType)
         {
             [self editText:translation];
@@ -1079,22 +1055,12 @@
     }
     else if(AT_MAGNIFY == actionType)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"magnify"
-                             withValue:nil];
-        
+
         [self magnify:translation type:bubbleType];
     }
     else if(AT_DELETE == actionType)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"delete"
-                             withValue:nil];
-        
+  
         self.selectedTranslation = translation;
         
         UIAlertView* alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Hint", @"")
@@ -1335,14 +1301,20 @@
     compose.messageComposeDelegate = self;
     compose.body = text;
     
-    [self presentModalViewController:compose animated:YES];
+    [self presentViewController:compose animated:YES completion:^{
+        
+    }];
     //[[[[compose viewControllers] lastObject] navigationItem] setTitle:@"SomethingElse"];//修改短信界面标题
     [compose release];
 }
 
 - (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result
 {
-    [controller dismissModalViewControllerAnimated:NO];//关键的一句   不能为YES
+    //关键的一句   不能为YES
+    [controller dismissViewControllerAnimated:NO completion:^{
+        
+    }];
+    
     switch ( result ) {
         case MessageComposeResultCancelled:
             break;
@@ -1384,7 +1356,7 @@
             
             [mailComposeViewController setMessageBody:mailContent isHTML:NO];
             [mailContent release];
-            [self presentModalViewController:mailComposeViewController animated:YES];
+            [self presentViewController:mailComposeViewController animated:YES completion:nil];
             [mailComposeViewController release];
         }
     }
@@ -1393,7 +1365,7 @@
 - (void)mailComposeController:(MFMailComposeViewController*)controller
 		  didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
-	[self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
     
     if(MFMailComposeResultSent == result)
     {
@@ -1405,12 +1377,6 @@
 {
     if(SHARE_TAG == actionSheet.tag)
     {
-        id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-        [tracker sendEventWithCategory:@"Action"
-                            withAction:@"button_press"
-                             withLabel:@"share"
-                             withValue:[NSNumber numberWithInt:buttonIndex]];
-        
         if([RCTool systemVersion] >= 6.0)
         {
             if(0 == buttonIndex)//facebook
@@ -1478,7 +1444,7 @@
         _tipLabel.backgroundColor = [UIColor clearColor];
         _tipLabel.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
         _tipLabel.font = [UIFont systemFontOfSize:14];
-        _tipLabel.textAlignment = UITextAlignmentCenter;
+        _tipLabel.textAlignment = NSTextAlignmentCenter;
         [self updateTipLabelByStep:0];
     }
     
@@ -1557,55 +1523,66 @@
     }
 }
 
-#pragma mark - AD
-
-- (void)initAD
+- (void)rearrange
 {
-    // Create a view of the standard size at the top of the screen.
-    // Available AdSize constants are explained in GADAdSize.h.
-    if(nil == _bannerView)
+    UIView* adView = [RCTool getAdView];
+    if(adView.superview)
+        self.adHeight = 50.0;
+    else
+        self.adHeight = 0.0f;
+    
+    CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        height = [RCTool getScreenSize].height - self.adHeight;
+    _tableView.frame = CGRectMake(0,0,[RCTool getScreenSize].width,height);
+    
+    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - self.adHeight;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - self.adHeight;
+    
+    if(_firstRecordButton)
     {
-        _bannerView = [[GADBannerView alloc] initWithAdSize:kGADAdSizeBanner];
-        
-        _bannerView.adUnitID = AD_ID;
-        _bannerView.rootViewController = self;
-        _bannerView.delegate = self;
+        _firstRecordButton.frame = CGRectMake(60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
+    }
+
+    if(_secondRecordButton)
+    {
+        _secondRecordButton.frame = CGRectMake([RCTool getScreenSize].width - RECORD_BUTTON_WIDTH - 60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
     }
     
-
-    [self.view addSubview:_bannerView];
+    y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - 62 - self.adHeight;
     
-    [self updateAd:nil];
+    if(_leftLevelMeter)
+    {
+        _leftLevelMeter.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
+    }
+    
+    y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
+    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+        y = [RCTool getScreenSize].height - 82 - self.adHeight;
+    
+    if(_tipLabel)
+    {
+        _tipLabel.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
+    }
 }
 
-- (void)updateAd:(id)argument
+- (void)removeAD:(NSNotification*)notifcation
 {
-    // Initiate a generic request to load it with an ad.
-    if(NO == [RCTool isRemoveAD])
-        [_bannerView loadRequest:[GADRequest request]];
+    UIView* adView = [RCTool getAdView];
+    if(adView && adView.superview)
+    {
+        [adView removeFromSuperview];
+    }
+    
+    [self rearrange];
 }
 
-- (void)adViewDidReceiveAd:(GADBannerView *)bannerView
+- (void)addAD:(NSNotification*)notifcation
 {
-    [UIView beginAnimations:@"BannerSlide" context:nil];
-    bannerView.frame = CGRectMake(0.0,
-                                  self.view.frame.size.height -
-                                  bannerView.frame.size.height,
-                                  bannerView.frame.size.width,
-                                  bannerView.frame.size.height);
-    [UIView commitAnimations];
-}
-
-- (void)adView:(GADBannerView *)bannerView
-didFailToReceiveAdWithError:(GADRequestError *)error
-{
-    [self performSelector:@selector(updateAd:) withObject:nil afterDelay:20];
-}
-
-- (void)removeAD:(NSNotification*)notification
-{
-    if(_bannerView)
-        [_bannerView removeFromSuperview];
+    [self rearrange];
 }
 
 @end

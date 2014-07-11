@@ -18,6 +18,7 @@
 @property(nonatomic,retain)NSArray* products;
 @property(nonatomic,retain)SKProduct* removeAdProduct;
 @property(assign)BOOL isPaying;
+@property(nonatomic,retain)SKProductsRequest *productsRequest;
 
 
 @end

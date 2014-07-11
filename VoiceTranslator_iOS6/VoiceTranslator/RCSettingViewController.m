@@ -51,9 +51,9 @@ typedef enum {
 
 - (void)dealloc
 {
-    NSLog(@"%s",__FUNCTION__);
-    
     [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+    self.productsRequest.delegate = nil;
+    self.productsRequest = nil;
     
     self.tableView = nil;
     self.itemArray = nil;
@@ -97,7 +97,9 @@ typedef enum {
 {
     NSLog(@"clickedRightBarButtonItem");
     
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:^{
+        
+    }];
 }
 
 #pragma mark - UITableView
@@ -169,7 +171,7 @@ typedef enum {
     else if(ST_PURCHASE == section)
 		return 1;
     else if(ST_HELP == section)
-		return 2;
+		return 1;
 	
 	return 0;
 }
@@ -398,24 +400,14 @@ typedef enum {
     {
         if(0 == indexPath.row)
         {
-            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-            [tracker sendEventWithCategory:@"Action"
-                                withAction:@"button_press"
-                                 withLabel:@"help"
-                                 withValue:nil];
-            
+
             RCHelpViewController* temp = [[RCHelpViewController alloc] initWithNibName:nil bundle:nil];
             [self.navigationController pushViewController:temp animated:YES];
             [temp release];
         }
         else if(1 == indexPath.row)
         {
-            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-            [tracker sendEventWithCategory:@"Action"
-                                withAction:@"button_press"
-                                 withLabel:@"feedback"
-                                 withValue:nil];
-            
+
             [self feedback];
         }
     }
@@ -429,12 +421,7 @@ typedef enum {
     {
         if(0 == buttonIndex)
         {
-            id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
-            [tracker sendEventWithCategory:@"Action"
-                                withAction:@"button_press"
-                                 withLabel:@"clear_history"
-                                 withValue:nil];
-            
+
             NSLog(@"clear up");
             [[NSNotificationCenter defaultCenter] postNotificationName:CLEAR_UP_NOTIFICATION object:nil];
             [RCTool deleteOldData];
@@ -494,7 +481,7 @@ typedef enum {
             
             [mailComposeViewController setMessageBody:mailContent isHTML:NO];
             [mailContent release];
-            [self presentModalViewController:mailComposeViewController animated:YES];
+            [self presentViewController:mailComposeViewController animated:YES completion:nil];
             [mailComposeViewController release];
         }
     }
@@ -503,7 +490,9 @@ typedef enum {
 - (void)mailComposeController:(MFMailComposeViewController*)controller
 		  didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
-	[self dismissModalViewControllerAnimated:YES];
+
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
     
     if(MFMailComposeResultSent == result)
     {
@@ -525,9 +514,13 @@ typedef enum {
 
 - (void)requestProductData
 {
-    SKProductsRequest *request= [[[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObjects:REMOVE_AD_ID,nil]] autorelease];
-    request.delegate = self;
-    [request start];
+    if(nil == _productsRequest)
+    {
+        _productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObjects:REMOVE_AD_ID,nil]];
+    }
+    
+    _productsRequest.delegate = self;
+    [_productsRequest start];
 }
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response

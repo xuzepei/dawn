@@ -16,6 +16,8 @@
 + (NSString*)getUserDocumentDirectoryPath;
 + (NSString *)md5:(NSString *)str;
 + (UIWindow*)frontWindow;
++ (NSDictionary*)parseToDictionary:(NSString*)jsonString;
+
 + (void)showAlert:(NSString*)aTitle message:(NSString*)message;
 + (void)hidenWebViewShadow:(UIWebView*)webView;
 + (NSString*)getDateString:(NSDate*)date;
@@ -128,5 +130,16 @@
 + (NSDictionary*)getLangaugeByCode:(NSString*)code;
 + (NSArray*)getLanguages:(BOOL)needSort;
 + (BOOL)needSetTextRightAlignment:(NSString*)code;
+
+
+#pragma mark - App Info
+
++ (NSString*)getAdId;
++ (NSString*)getScreenAdId;
++ (int)getScreenAdRate;
++ (NSString*)getAppURL;
++ (BOOL)isOpenAll;
++ (UIView*)getAdView;
++ (NSString*)decrypt:(NSString*)text;
 
 @end

@@ -58,7 +58,7 @@
 {
     NSLog(@"clickedRightBarButtonItem");
     
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)updateContent:(CHOOSE_LANGUAGE_TYPE)type
