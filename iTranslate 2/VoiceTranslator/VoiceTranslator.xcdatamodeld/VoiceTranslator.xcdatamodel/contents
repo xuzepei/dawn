@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13E28" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Translation" representedClassName="Translation" syncable="YES">
+        <attribute name="align" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="fromCode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fromText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fromTextDetail" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fromVoice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isHidden" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="isLoading" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="showTime" optional="YES" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="textUrl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="time" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="toCode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="toText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="toTextDetail" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="toVoice" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ttsUrl" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Translation" positionX="160" positionY="192" width="128" height="270"/>
+    </elements>
+</model>

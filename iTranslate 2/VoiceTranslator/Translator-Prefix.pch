@@ -1,0 +1,141 @@
+//
+// Prefix header for all source files of the 'VoiceTranslator' target in the 'VoiceTranslator' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import <CoreData/CoreData.h>
+#endif
+
+#ifndef DEBUG
+#define NSLog //
+#endif
+
+#define TIME_OUT 20
+
+#define CT_UNKNOWN 0
+#define CT_XML 1
+#define CT_JSON 2
+
+#define APP_VERSION 1.1
+
+#define ISFORIOS7 1
+
+#define GOOGLE_TRACKING_ID @"UA-42277910-1"
+
+typedef enum {
+	NotReachable = 0,
+	ReachableViaWiFi,
+	ReachableViaWWAN
+} NetworkStatus;
+
+typedef enum {
+    
+    ET_UNKNOWN = 0,
+	ET_UTTERANCE,
+    ET_TTS,
+    
+}ErrorType;
+
+typedef enum{
+    RBT_LEFT = 0,
+    RBT_RIGHT
+}RECORD_BUTTON_TYPE;
+
+typedef enum{
+    SWT_UNKNOWN = 0,
+    SWT_DETECTEND,
+    SWT_AUTOSPEAK
+}SWITCH_TYPE;
+
+typedef enum{
+    SLT_UNKNOWN = 0,
+    SLT_VOLUME,
+    SLT_SPEED
+}SLIDER_TYPE;
+
+typedef enum{
+    CLT_LEFT = 0,
+    CLT_RIGHT
+}CHOOSE_LANGUAGE_TYPE;
+
+typedef enum{
+    BFT_UNKNOWN = 0,
+    BFT_TIME,
+    BFT_FROMTEXT,
+    BFT_TOTEXT,
+}BUBBLE_FONT_TYPE;
+
+typedef enum{
+    AT_UNKNOWN = 0,
+    AT_COPY,
+    AT_EDIT,
+    AT_SHARE,
+    AT_DELETE,
+    AT_SPEAK,
+    AT_MAGNIFY,
+}ACTION_TYPE;
+
+typedef enum{
+    BT_FROM = 0,
+    BT_TO,
+}BUBBLE_TYPE;
+
+typedef enum {
+    OT_TOP = 0,
+    OT_BOTTOM,
+    OT_LEFT,
+    OT_RIGHT,
+    OT_MIDDLE,
+}ORIENTATION_TYPE;
+
+#define NAVIGATION_BAR_COLOR [UIColor colorWithRed:0.03 green:0.51 blue:1.00 alpha:1.0]
+
+#define STATUS_BAR_HEIGHT 20.0
+#define NAVIGATION_BAR_HEIGHT 44.0
+
+
+#define BUBBLE_PADDING_TOP 4.0f
+#define BUBBLE_PADDING_BOTTOM 3.0f
+#define BUBBLE_PADDING_LEFT 14.0f
+#define BUBBLE_PADDING_RIGHT 6.0f
+#define BUBBLE_MARGIN_TOP 12.0f
+#define BUBBLE_MARGIN_BOTTOM 4.0f
+#define BUBBLE_LOADING_HEIGHT 30.0f
+#define BUBBLE_TIME_HEIGHT 16.0f
+#define BUBBLE_FROM_TO_INTERVAL 10.0f
+
+#define MIN_BUBBLE_WIDTH 60.0
+#define MIN_BUBBLE_HEIGHT 30.0
+
+#define BUBBLE_EDGE_INSETS UIEdgeInsetsMake(12, 20, 13, 22)
+
+#define APP_TINT_COLOR [RCTool colorWithHex:0x0dcffa]
+
+#define DETECT_END_OF_SPEECH_NOTIFICATION @"DETECT_END_OF_SPEECH_NOTIFICATION"
+#define CLEAR_UP_NOTIFICATION @"CLEAR_UP_NOTIFICATION"
+#define REMOVE_AD_NOTIFICATION @"REMOVE_AD_NOTIFICATION"
+#define ADD_AD_NOTIFICATION @"ADD_AD_NOTIFICATION"
+
+#define APP_URL @"http://itunes.apple.com/app/374193044"
+
+//广告ID
+#define AD_ID @"ca-app-pub-1207330468801232/9317909182"
+#define SCREEN_AD_ID @"ca-app-pub-1207330468801232/6769251988"
+#define SCREEN_AD_RATE 5
+
+//UMeng 设置
+#define UMENG_APP_KEY @"53b0dce956240b6b0705873e"
+
+//获取协同信息URL
+#define APP_INFO_URL @"http://www.tapguilt.com/api/translator.php"
+
+//密钥
+#define SECRET_KEY @"20140711"
