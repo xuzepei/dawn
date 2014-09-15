@@ -62,13 +62,22 @@
     NSString* code = [RCTool getLeftLanguage];
     NSDictionary* language = [RCTool getLangaugeByCode:code];
     
-    if(_fromLabel)
+    if(_fromLabel.frame.origin.x < _toLabel.frame.origin.x)
+    {
         _fromLabel.text = [language objectForKey:@"name"];
+    }
+    else
+    {
+        _toLabel.text = [language objectForKey:@"name"];
+    }
     
     code = [RCTool getRightLanguage];
     language = [RCTool getLangaugeByCode:code];
-    if(_toLabel)
+    if(_toLabel.frame.origin.x > _fromLabel.frame.origin.x)
         _toLabel.text = [language objectForKey:@"name"];
+    else
+        _fromLabel.text = [language objectForKey:@"name"];
+        
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event

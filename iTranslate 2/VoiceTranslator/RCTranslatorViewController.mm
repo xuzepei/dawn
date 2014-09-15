@@ -281,9 +281,9 @@
     if(0 == section)
     {
         if([RCTool isIpad])
-            return 90.0f;
+            return 110.0f;
         else
-            return 50.0;
+            return 70.0;
     }
     
     return 0.0;
@@ -1589,8 +1589,8 @@
         self.adHeight = 0.0f;
     
     CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        height = [RCTool getScreenSize].height - self.adHeight;
+    if([RCTool systemVersion] >= 7.0)
+        height = [RCTool getScreenSize].height;
     _tableView.frame = CGRectMake(0,0,[RCTool getScreenSize].width,height);
     
     CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - self.adHeight;
