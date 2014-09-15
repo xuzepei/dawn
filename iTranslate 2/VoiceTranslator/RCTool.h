@@ -78,7 +78,16 @@
 
 + (BOOL)isIphone5;
 
++ (BOOL)isIpad;
+
 + (CGFloat)systemVersion;
+
+
+#pragma mark - 图片
++ (UIImage *)imageWithImage:(UIImage *)image
+               scaledToSize:(CGSize)newSize;
++ (BOOL)saveImage:(NSData*)data path:(NSString*)path;
++ (UIImage*)getImageFromLocal:(NSString*)path;
 
 #pragma mark - 文件相关操作
 
@@ -144,5 +153,6 @@
 + (BOOL)isOpenAll;
 + (UIView*)getAdView;
 + (NSString*)decrypt:(NSString*)text;
-
++ (NSArray*)getOtherApps;
++ (NSDictionary*)getAlert;
 @end

@@ -75,32 +75,40 @@
 {
     [super touchesEnded:touches withEvent:event];
     
-    [UIView animateWithDuration:0.3 animations:^{
-        
-        NSString* fromeCode = [RCTool getLeftLanguage];
-        NSString* toCode = [RCTool getRightLanguage];
-        
-        [RCTool setLeftLanguage:toCode];
-        [RCTool setRightLanguage:fromeCode];
-        
-        CGRect leftLabelRect = _fromLabel.frame;
-        CGRect rightLabelRect = _toLabel.frame;
-        
-        _toLabel.frame = leftLabelRect;
-        if(_toLabel.textAlignment == NSTextAlignmentLeft)
-            _toLabel.textAlignment = NSTextAlignmentRight;
-        else if(_toLabel.textAlignment == NSTextAlignmentRight)
-            _toLabel.textAlignment = NSTextAlignmentLeft;
-        
-        _fromLabel.frame = rightLabelRect;
-        if(_fromLabel.textAlignment == NSTextAlignmentLeft)
-            _fromLabel.textAlignment = NSTextAlignmentRight;
-        else if(_fromLabel.textAlignment == NSTextAlignmentRight)
-            _fromLabel.textAlignment = NSTextAlignmentLeft;
-        
-    }completion:^(BOOL finished) {
-        
-    }];
+    UITouch* endTouch = [touches anyObject];
+    CGPoint point = [endTouch locationInView:self];
+    
+    CGRect switchButtonRect = CGRectMake((self.bounds.size.width - 40)/2.0, 2, 40, 40);
+    if(CGRectContainsPoint(switchButtonRect, point))
+    {
+        [UIView animateWithDuration:0.3 animations:^{
+            
+            NSString* fromeCode = [RCTool getLeftLanguage];
+            NSString* toCode = [RCTool getRightLanguage];
+            
+            [RCTool setLeftLanguage:toCode];
+            [RCTool setRightLanguage:fromeCode];
+            
+            CGRect leftLabelRect = _fromLabel.frame;
+            CGRect rightLabelRect = _toLabel.frame;
+            
+            _toLabel.frame = leftLabelRect;
+            if(_toLabel.textAlignment == NSTextAlignmentLeft)
+                _toLabel.textAlignment = NSTextAlignmentRight;
+            else if(_toLabel.textAlignment == NSTextAlignmentRight)
+                _toLabel.textAlignment = NSTextAlignmentLeft;
+            
+            _fromLabel.frame = rightLabelRect;
+            if(_fromLabel.textAlignment == NSTextAlignmentLeft)
+                _fromLabel.textAlignment = NSTextAlignmentRight;
+            else if(_fromLabel.textAlignment == NSTextAlignmentRight)
+                _fromLabel.textAlignment = NSTextAlignmentLeft;
+            
+        }completion:^(BOOL finished) {
+            
+        }];
+    }
+
 }
 
 @end

@@ -9,6 +9,7 @@
 #import "RCAppDelegate.h"
 #import "RCTool.h"
 
+#define APP_ALERT 111
 
 @implementation RCAppDelegate
 
@@ -24,9 +25,6 @@
     
     self.adMobAd = nil;
     self.adInterstitial = nil;
-    
-    self.adView = nil;
-    self.interstitial = nil;
     
     self.ad_id = nil;
     
@@ -92,7 +90,7 @@
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     
     self.showFullScreenAd = YES;
-    //[self getAppInfo];
+    [self getAppInfo];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -225,6 +223,8 @@
         [[NSUserDefaults standardUserDefaults] setObject:result forKey:@"app_info"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
+        [self doAlert];
+        
         self.ad_id = [RCTool getAdId];
         
         [self getAD];
@@ -242,16 +242,23 @@
 		_adMobAd = nil;
 	}
     
-    if([RCTool isRemoveAD])
-        return;
+//    if([RCTool isRemoveAD])
+//        return;
     
-	//if(NO == [RCTool isIpad])
+	if(NO == [RCTool isIpad])
 	{
 		_adMobAd = [[GADBannerView alloc]
                     initWithFrame:CGRectMake(0.0,0,
-                                             320.0f,
-                                             50.0f)];
+                                             kGADAdSizeBanner.size.width,
+                                             kGADAdSizeBanner.size.height)];
 	}
+    else
+    {
+        _adMobAd = [[GADBannerView alloc]
+                    initWithFrame:CGRectMake(0.0,0,
+                                             kGADAdSizeLeaderboard.size.width,
+                                             kGADAdSizeLeaderboard.size.height)];
+    }
 
 	
 	
@@ -274,13 +281,7 @@
         self.adMobAd = nil;
     }
     
-    if(self.adView && self.adView.superview)
-    {
-        [self.adView removeFromSuperview];
-        self.adView = nil;
-    }
     self.adInterstitial = nil;
-    self.interstitial = nil;
 	
 	[self initAdMob];
     
@@ -305,7 +306,7 @@
         self.isAdMobVisible = NO;
     }
     
-    if(NO == [RCTool isRemoveAD])
+    //if(NO == [RCTool isRemoveAD])
     {
         [_translatorViewController.view addSubview:_adMobAd];
         
@@ -332,8 +333,8 @@ didFailToReceiveAdWithError:(GADRequestError *)error
         _adInterstitial.delegate = self;
     }
     
-    if([RCTool isRemoveAD])
-        return;
+//    if([RCTool isRemoveAD])
+//        return;
     
     [_adInterstitial loadRequest:[GADRequest request]];
 }
@@ -342,7 +343,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error
 {
     NSLog(@"interstitialDidReceiveAd");
     
-    if(self.showFullScreenAd && NO == [RCTool isRemoveAD])
+    if(self.showFullScreenAd/* && NO == [RCTool isRemoveAD]*/)
     {
         self.showFullScreenAd = NO;
         [self showInterstitialAd:nil];
@@ -355,7 +356,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error
 {
     NSLog(@"%s",__FUNCTION__);
     
-    [self initInterstitial];
+    [self performSelector:@selector(getAdInterstitial) withObject:nil afterDelay:10];
 }
 
 - (void)interstitialDidDismissScreen:(GADInterstitial *)ad
@@ -370,76 +371,74 @@ didFailToReceiveAdWithError:(GADRequestError *)error
     {
         [self.adInterstitial presentFromRootViewController:_translatorViewController];
     }
-    else if(self.interstitial && self.interstitial.loaded)
+}
+
+#pragma mark - App Info
+
+- (void)doAlert
+{
+    NSDictionary* alert = [RCTool getAlert];
+    if(alert)
     {
-        [self.interstitial presentFromViewController:_translatorViewController];
+        NSString* id = [alert objectForKey:@"id"];
+        if([id length])
+        {
+            NSString* record = [[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"alert_%@",id]];
+            
+            if([record length])
+                return;
+            else
+            {
+                [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:[NSString stringWithFormat:@"alert_%@",id]];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+            }
+        }
+        
+        int type = [[alert objectForKey:@"type"] intValue];
+        NSString* title = [alert objectForKey:@"title"];
+        NSString* message = [alert objectForKey:@"message"];
+        
+        NSString* b0_name = @"Cancel";
+        b0_name = [alert objectForKey:@"b0_name"];
+        
+        NSString* b1_name = @"OK";
+        b1_name = [alert objectForKey:@"b1_name"];
+        
+        if(0 == type)
+        {
+            UIAlertView* temp = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:b0_name otherButtonTitles:nil];
+            temp.tag = APP_ALERT;
+            [temp show];
+        }
+        else
+        {
+            UIAlertView* temp = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:b0_name otherButtonTitles:b1_name,nil];
+            temp.tag = APP_ALERT;
+            [temp show];
+        }
     }
 }
 
-#pragma mark - iAd
-
-- (void)initAdView
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if(nil == _adView)
-        _adView = [[ADBannerView alloc] initWithAdType:ADAdTypeBanner];
-    _adView.delegate = self;
-    CGRect rect = _adView.frame;
-    rect.origin.y = [RCTool getScreenSize].height;
-    _adView.frame = rect;
-    
-    self.isAdViewVisible = NO;
-}
-
-- (void)bannerViewDidLoadAd:(ADBannerView *)banner
-{
-    NSLog(@"iAd,bannerViewDidLoadAd");
-    
-    //[[RCTool getRootNavigationController].topViewController.view addSubview:_adView];
-}
-
-- (void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error
-{
-    NSLog(@"iAd,didFailToReceiveAdWithError");
-    
-    self.isAdViewVisible = NO;
-    [self.adView removeFromSuperview];
-    self.adView = nil;
-    
-    //如果iAd失败，则调用admob
-    [self performSelector:@selector(initAdMob) withObject:nil afterDelay:3];
-}
-
-- (void)initInterstitial
-{
-    if(nil == _interstitial)
+    if(APP_ALERT == alertView.tag)
     {
-        _interstitial = [[ADInterstitialAd alloc] init];
-        _interstitial.delegate = self;
+        NSLog(@"%d",buttonIndex);
+        
+        NSDictionary* alert = [RCTool getAlert];
+        if(alert)
+        {
+            int type = [[alert objectForKey:@"type"] intValue];
+            if(0 == type || (1 == type && 1 == buttonIndex))
+            {
+                NSString* urlString = [alert objectForKey:@"url"];
+                if([urlString length])
+                {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+                }
+            }
+        }
     }
-    
 }
-
-- (void)interstitialAdDidLoad:(ADInterstitialAd *)interstitialAd
-{
-    NSLog(@"iAd,interstitialAdDidLoad");
-    
-    
-}
-
-- (void)interstitialAdDidUnload:(ADInterstitialAd *)interstitialAd
-{
-    NSLog(@"iAd,interstitialAdDidUnload");
-    self.interstitial = nil;
-}
-
-- (void)interstitialAd:(ADInterstitialAd *)interstitialAd didFailWithError:(NSError *)error
-{
-    NSLog(@"iAd,interstitialAd <%@> recieved error <%@>", interstitialAd, error);
-    self.interstitial = nil;
-    
-    //尝试调用Admob的全屏广告
-    [self getAdInterstitial];
-}
-
 
 @end

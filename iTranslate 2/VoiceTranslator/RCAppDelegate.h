@@ -14,7 +14,7 @@
 #import "RCHttpRequest.h"
 #import "MobClick.h"
 
-@interface RCAppDelegate : UIResponder <UIApplicationDelegate,GADBannerViewDelegate,GADInterstitialDelegate,ADBannerViewDelegate,ADInterstitialAdDelegate>
+@interface RCAppDelegate : UIResponder <UIApplicationDelegate,GADBannerViewDelegate,GADInterstitialDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
@@ -28,11 +28,6 @@
 @property (nonatomic, retain) GADBannerView *adMobAd;
 @property (assign)BOOL isAdMobVisible;
 @property (nonatomic, retain) GADInterstitial *adInterstitial;
-
-@property (nonatomic, retain) ADBannerView *adView;
-@property (assign)BOOL isAdViewVisible;
-@property (nonatomic, retain) ADInterstitialAd* interstitial;
-
 @property (nonatomic,retain) NSString* ad_id;
 @property (nonatomic,assign)BOOL showFullScreenAd;
 

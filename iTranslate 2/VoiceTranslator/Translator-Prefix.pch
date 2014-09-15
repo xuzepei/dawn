@@ -102,18 +102,19 @@ typedef enum {
 #define NAVIGATION_BAR_HEIGHT 44.0
 
 
-#define BUBBLE_PADDING_TOP 4.0f
-#define BUBBLE_PADDING_BOTTOM 3.0f
-#define BUBBLE_PADDING_LEFT 14.0f
-#define BUBBLE_PADDING_RIGHT 6.0f
+#define BUBBLE_PADDING_TOP 6.0f
+#define BUBBLE_PADDING_BOTTOM 6.0f
+#define BUBBLE_PADDING_LEFT 10.0f
+#define BUBBLE_PADDING_RIGHT 10.0f
+
 #define BUBBLE_MARGIN_TOP 12.0f
 #define BUBBLE_MARGIN_BOTTOM 4.0f
 #define BUBBLE_LOADING_HEIGHT 30.0f
-#define BUBBLE_TIME_HEIGHT 16.0f
+#define BUBBLE_TIME_HEIGHT 36.0f
 #define BUBBLE_FROM_TO_INTERVAL 10.0f
 
 #define MIN_BUBBLE_WIDTH 60.0
-#define MIN_BUBBLE_HEIGHT 30.0
+#define MIN_BUBBLE_HEIGHT 33.0
 
 #define BUBBLE_EDGE_INSETS UIEdgeInsetsMake(12, 20, 13, 22)
 
@@ -135,7 +136,7 @@ typedef enum {
 #define UMENG_APP_KEY @"53b0dce956240b6b0705873e"
 
 //获取协同信息URL
-#define APP_INFO_URL @"http://www.tapguilt.com/api/translator.php"
+#define APP_INFO_URL @"http://www.tapguilt.com/api/translator.php?v=1.7"
 
 //密钥
 #define SECRET_KEY @"20140711"

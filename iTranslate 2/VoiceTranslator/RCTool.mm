@@ -595,6 +595,140 @@ static int g_reachabilityType = -1;
 	return NO;
 }
 
+#pragma mark - 图片
+
++ (UIImage *)imageWithImage:(UIImage *)image
+               scaledToSize:(CGSize)newSize
+{
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
+
++ (BOOL)saveImage:(NSData*)data path:(NSString*)path
+{
+    if(nil == data || 0 == [path length])
+        return NO;
+    
+    NSString* directoryPath = [NSString stringWithFormat:@"%@/images",[RCTool getUserDocumentDirectoryPath]];
+    if(NO == [RCTool isExistingFile:directoryPath])
+    {
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        [fileManager createDirectoryAtPath:directoryPath withIntermediateDirectories:NO attributes:nil error:NULL];
+    }
+    
+    NSString* suffix = @"";
+    NSRange range = [path rangeOfString:@"." options:NSBackwardsSearch];
+    if(range.location != NSNotFound && ([path length] - range.location <= 4))
+        suffix = [path substringFromIndex:range.location + range.length];
+    
+    NSString* md5Path = [RCTool md5:path];
+    NSString* savePath = nil;
+    if([suffix length])
+    {
+        savePath = [NSString stringWithFormat:@"%@/images/%@.%@",[RCTool getUserDocumentDirectoryPath],md5Path,suffix];
+    }
+    else
+        savePath = [NSString stringWithFormat:@"%@/images/%@",[RCTool getUserDocumentDirectoryPath],md5Path];
+    
+    //保存原图
+    if(NO == [data writeToFile:savePath atomically:YES])
+        return NO;
+    
+    
+    //	//保存小图
+    //	UIImage* image = [UIImage imageWithData:data];
+    //	if(nil == image)
+    //		return NO;
+    //
+    //    if(image.size.width <= 140 || image.size.height <= 140)
+    //    {
+    //        return [data writeToFile:saveSmallImagePath atomically:YES];
+    //    }
+    //
+    //	CGSize size = CGSizeMake(140, 140);
+    //	// 创建一个bitmap的context
+    //	// 并把它设置成为当前正在使用的context
+    //	UIGraphicsBeginImageContext(size);
+    //
+    //	// 绘制改变大小的图片
+    //	[image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    //
+    //	// 从当前context中创建一个改变大小后的图片
+    //	UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    //
+    //	// 使当前的context出堆栈
+    //	UIGraphicsEndImageContext();
+    //
+    //	NSData* data2 = UIImagePNGRepresentation(scaledImage);
+    //	if(data2)
+    //    {
+    //		return [data2 writeToFile:saveSmallImagePath atomically:YES];
+    //    }
+    
+    return YES;
+}
+
+
++ (UIImage*)getImageFromLocal:(NSString*)path
+{
+    if(0 == [path length])
+        return nil;
+    
+    NSString* suffix = @"";
+    NSRange range = [path rangeOfString:@"." options:NSBackwardsSearch];
+    if(range.location != NSNotFound && ([path length] - range.location <= 4))
+        suffix = [path substringFromIndex:range.location + range.length];
+    
+    NSString* md5Path = [RCTool md5:path];
+    NSString* savePath = nil;
+    if([suffix length])
+        savePath = [NSString stringWithFormat:@"%@/images/%@.%@",[RCTool getUserDocumentDirectoryPath],md5Path,suffix];
+    else
+        savePath = [NSString stringWithFormat:@"%@/images/%@",[RCTool getUserDocumentDirectoryPath],md5Path];
+    
+    return [UIImage imageWithContentsOfFile:savePath];
+}
+
++ (NSString*)getImageLocalPath:(NSString *)path
+{
+    if(0 == [path length])
+        return nil;
+    
+    NSString* suffix = @"";
+    NSRange range = [path rangeOfString:@"." options:NSBackwardsSearch];
+    if(range.location != NSNotFound && ([path length] - range.location <= 4))
+        suffix = [path substringFromIndex:range.location + range.length];
+    
+    NSString* md5Path = [RCTool md5:path];
+    if([suffix length])
+        return [NSString stringWithFormat:@"%@/images/%@.%@",[RCTool getUserDocumentDirectoryPath],md5Path,suffix];
+    else
+        return [NSString stringWithFormat:@"%@/images/%@",[RCTool getUserDocumentDirectoryPath],md5Path];
+}
+
+#pragma mark - 文件操作
+
++ (BOOL)isExistingFile:(NSString*)path
+{
+    if(0 == [path length])
+        return NO;
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    return [fileManager fileExistsAtPath:path];
+}
+
++ (BOOL)removeFile:(NSString*)filePath
+{
+    if([filePath length])
+        return [[NSFileManager defaultManager] removeItemAtPath:filePath
+                                                          error:nil];
+    
+    return NO;
+}
+
 #pragma mark - Core Data
 
 + (NSPersistentStoreCoordinator*)getPersistentStoreCoordinator
@@ -806,6 +940,21 @@ static int g_reachabilityType = -1;
     return NO;
 }
 
++ (BOOL)isIpad
+{
+    UIDevice* device = [UIDevice currentDevice];
+    if(device.userInterfaceIdiom == UIUserInterfaceIdiomPhone)
+    {
+        return NO;
+    }
+    else if(device.userInterfaceIdiom == UIUserInterfaceIdiomPad)
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
 + (CGFloat)systemVersion
 {
     CGFloat systemVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
@@ -828,19 +977,6 @@ static int g_reachabilityType = -1;
     }
     
     return [NSString stringWithFormat:@"%@/record/%@.wav",[RCTool getUserDocumentDirectoryPath],filename];
-}
-
-+ (BOOL)isExistingFile:(NSString*)filePath
-{
-	NSFileManager* fileManager = [NSFileManager defaultManager];
-	return [fileManager fileExistsAtPath:filePath];
-}
-
-+ (void)removeFile:(NSString*)filePath
-{
-    if([filePath length])
-        [[NSFileManager defaultManager] removeItemAtPath:filePath
-                                                   error:nil];
 }
 
 + (NSString*)createRecordFilename
@@ -1338,23 +1474,13 @@ static int g_reachabilityType = -1;
         if([openall isEqualToString:@"1"])
             return YES;
     }
-    else
-    {
-        NSDate* date = [[[NSDate alloc] initWithString:@"2014-04-1 12:06:04 +0800"] autorelease];
-        NSDate* startDate = [NSDate date];
-        
-        if([startDate timeIntervalSinceDate:date] >= 14*24*60*60)
-        {
-            return YES;
-        }
-    }
     
     return NO;
 }
 
 + (UIView*)getAdView
 {
-	RCAppDelegate* appDelegate = (RCAppDelegate*)[[UIApplication sharedApplication] delegate];
+    RCAppDelegate* appDelegate = (RCAppDelegate*)[[UIApplication sharedApplication] delegate];
     
     if(appDelegate.adMobAd.alpha)
     {
@@ -1362,14 +1488,14 @@ static int g_reachabilityType = -1;
         if(adView)
             return adView;
     }
-	
-	return nil;
+    
+    return nil;
 }
 
 + (NSString*)decryptUseDES:(NSString*)cipherText key:(NSString*)key {
     // 利用 GTMBase64 解碼 Base64 字串
     NSData* cipherData = [GTMBase64 decodeString:cipherText];
-    unsigned char buffer[1024];
+    unsigned char buffer[4096];
     memset(buffer, 0, sizeof(char));
     size_t numBytesDecrypted = 0;
     
@@ -1383,12 +1509,12 @@ static int g_reachabilityType = -1;
                                           [cipherData bytes],
                                           [cipherData length],
                                           buffer,
-                                          1024,
+                                          4096,
                                           &numBytesDecrypted);
     NSString* plainText = nil;
     if (cryptStatus == kCCSuccess) {
         NSData* data = [NSData dataWithBytes:buffer length:(NSUInteger)numBytesDecrypted];
-        plainText = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+        plainText = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     }
     return plainText;
 }
@@ -1396,7 +1522,7 @@ static int g_reachabilityType = -1;
 + (NSString *)encryptUseDES:(NSString *)clearText key:(NSString *)key
 {
     NSData *data = [clearText dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
-    unsigned char buffer[1024];
+    unsigned char buffer[4096];
     memset(buffer, 0, sizeof(char));
     size_t numBytesEncrypted = 0;
     
@@ -1409,7 +1535,7 @@ static int g_reachabilityType = -1;
                                           [data bytes],
                                           [data length],
                                           buffer,
-                                          1024,
+                                          4096,
                                           &numBytesEncrypted);
     
     NSString* plainText = nil;
@@ -1435,6 +1561,38 @@ static int g_reachabilityType = -1;
         return decrypt;
     
     return @"";
+}
+
++ (NSArray*)getOtherApps
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        if([RCTool isOpenAll])
+        {
+            NSArray* array = [app_info objectForKey:@"other_apps"];
+            if(array && [array isKindOfClass:[NSArray class]])
+                return array;
+        }
+    }
+    
+    return nil;
+}
+
++ (NSDictionary*)getAlert
+{
+    NSDictionary* app_info = [[NSUserDefaults standardUserDefaults] objectForKey:@"app_info"];
+    if(app_info && [app_info isKindOfClass:[NSDictionary class]])
+    {
+        if([RCTool isOpenAll])
+        {
+            NSDictionary* dict = [app_info objectForKey:@"alert"];
+            if(dict && [dict isKindOfClass:[NSDictionary class]])
+                return dict;
+        }
+    }
+    
+    return nil;
 }
 
 

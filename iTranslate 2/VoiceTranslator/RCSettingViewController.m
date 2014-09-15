@@ -12,6 +12,7 @@
 #import "RCChooseLanguageViewController.h"
 #import "RCHelpViewController.h"
 #import "RCSliderCell.h"
+#import "RCImageLoader.h"
 
 #define CLEAR_TAG 200
 #define PURCHASE_TAG 201
@@ -22,6 +23,7 @@ typedef enum {
 	ST_VOICE,
     ST_VOLUME,
     ST_CLEANUP,
+    ST_OTHERAPP,
     ST_PURCHASE,
     ST_HELP,
 }SettingType;
@@ -87,6 +89,8 @@ typedef enum {
 //    }
     
     //[self.navigationController.navigationBar setTintColor:APP_TINT_COLOR];
+    
+    [self requestContent];
 }
 
 - (void)didReceiveMemoryWarning
@@ -102,6 +106,20 @@ typedef enum {
     [self dismissViewControllerAnimated:YES completion:^{
         
     }];
+}
+
+- (void)requestContent
+{
+    if(nil == _otherApps)
+        _otherApps = [[NSMutableArray alloc] init];
+    
+    [_otherApps removeAllObjects];
+    
+    NSArray* otherApps = [RCTool getOtherApps];
+    if([otherApps count])
+        [_otherApps addObjectsFromArray:otherApps];
+    
+    [self.tableView reloadData];
 }
 
 #pragma mark - UITableView
@@ -124,9 +142,23 @@ typedef enum {
 	[self.view addSubview:_tableView];
 }
 
+- (id)getCellDataAtIndexPath:(NSIndexPath*)indexPath
+{
+    if(ST_OTHERAPP == indexPath.section)
+    {
+        if(indexPath.row < [_otherApps count])
+            return [_otherApps objectAtIndex: indexPath.row];
+    }
+    
+    return nil;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 4;
+    if([_otherApps count])
+        return 5;
+    
+    return 4;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -155,6 +187,10 @@ typedef enum {
     {
         return NSLocalizedString(@"Help", @"");
     }
+    else if(ST_OTHERAPP == section)
+    {
+        return NSLocalizedString(@"Featured Apps", @"");
+    }
     
 	return @"";
 }
@@ -174,12 +210,25 @@ typedef enum {
 		return 1;
     else if(ST_HELP == section)
 		return 1;
+    else if(ST_OTHERAPP == section)
+        return [_otherApps count];
 	
 	return 0;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if(ST_OTHERAPP == indexPath.section)
+    {
+        if([RCTool isIpad])
+        {
+            return 70.0f;
+        }
+        else{
+            return 60.0f;
+        }
+    }
+    
 	return 50.0;
 }
 
@@ -194,6 +243,7 @@ typedef enum {
     static NSString *cellId5 = @"cellId5";
     static NSString *cellId6 = @"cellId6";
     static NSString *cellId7 = @"cellId7";
+    static NSString *cellId8 = @"cellId8";
 	
 	UITableViewCell *cell = nil;
 	if(ST_LANGUAGE == indexPath.section)
@@ -207,10 +257,8 @@ typedef enum {
                                                reuseIdentifier: cellId] autorelease];
                 
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                
-                UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14];
-                cell.detailTextLabel.font = font;
-                cell.detailTextLabel.text = @"translate from";
+
+                cell.detailTextLabel.text = @"Translate from";
                 cell.detailTextLabel.textColor = [UIColor grayColor];
 			}
             
@@ -234,9 +282,8 @@ typedef enum {
                                                reuseIdentifier: cellId1] autorelease];
                 
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:14];
-                cell.detailTextLabel.font = font;
-                cell.detailTextLabel.text = @"translate to";
+
+                cell.detailTextLabel.text = @"Translate to";
                 cell.detailTextLabel.textColor = [UIColor grayColor];
 			}
             
@@ -339,6 +386,41 @@ typedef enum {
             cell.textLabel.text = NSLocalizedString(@"Feedback",@"");
         }
 	}
+    else if(ST_OTHERAPP == indexPath.section)
+    {
+        cell = [tableView dequeueReusableCellWithIdentifier:cellId8];
+        if (cell == nil)
+        {
+            cell = [[[UITableViewCell alloc] initWithStyle: UITableViewCellStyleSubtitle
+                                           reuseIdentifier: cellId8] autorelease];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            cell.detailTextLabel.textColor = [UIColor grayColor];
+        }
+        
+        NSDictionary* item = (NSDictionary*)[self getCellDataAtIndexPath:indexPath];
+        if(item)
+        {
+            cell.textLabel.text = [item objectForKey:@"name"];
+            cell.detailTextLabel.text = [item objectForKey:@"desc"];
+            
+            NSString* imageUrl = [item objectForKey:@"img_url"];
+            if([imageUrl length])
+            {
+                UIImage* image = [RCTool getImageFromLocal:imageUrl];
+                if(image)
+                {
+                    image = [RCTool imageWithImage:image scaledToSize:CGSizeMake(40.0, 40.0)];
+                    cell.imageView.image = image;
+                }
+                else
+                {
+                    [[RCImageLoader sharedInstance] saveImage:imageUrl
+                                                     delegate:self
+                                                        token:nil];
+                }
+            }
+        }
+    }
     
 	
     return cell;
@@ -404,6 +486,16 @@ typedef enum {
         {
 
             [self feedback];
+        }
+    }
+    else if(ST_OTHERAPP == indexPath.section)
+    {
+        NSDictionary* item = (NSDictionary*)[self getCellDataAtIndexPath:indexPath];
+        if(item)
+        {
+            NSString* urlString = [item objectForKey:@"url"];
+            if([urlString length])
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
         }
     }
 }

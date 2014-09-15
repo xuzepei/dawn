@@ -11,7 +11,7 @@
 #import "ASIHTTPRequest.h"
 #import "UIMenuItem+CXAImageSupport.h"
 
-#define OFFSET_X 22.0f
+#define OFFSET_X 4.0f
 
 #define FLAG_OFFSET_X 6.0
 #define FLAG_SIZE CGSizeMake(15.0,10.0)
@@ -105,11 +105,8 @@
     else if(CLT_RIGHT == type)
     {
         bubbleImage = [UIImage imageNamed:@"rbf_0"];
-        if([RCTool systemVersion] >= 6.0)
-            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
-        else
-            bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS];
-        
+        bubbleImage = [bubbleImage resizableImageWithCapInsets:BUBBLE_EDGE_INSETS resizingMode:UIImageResizingModeStretch];
+
         bubble_x = self.bounds.size.width - fromBubbleSize.width - OFFSET_X;
         alignment = NSTextAlignmentRight;
         
@@ -126,35 +123,17 @@
         
         //国旗
         UIImage* flagImage = [UIImage imageNamed:[NSString stringWithFormat:@"flag_%@",_translation.fromCode]];
+
+        flag_x = bubbleFrame.origin.x + bubbleFrame.size.width + OFFSET_X;
         
-        if(CLT_LEFT == type)
-        {
-//            flag_x = bubbleFrame.origin.x + bubbleFrame.size.width + FLAG_OFFSET_X;
-            flag_x = 4.0;
-        }
-        else if(CLT_RIGHT == type)
-        {
-//            flag_x = bubbleFrame.origin.x - FLAG_OFFSET_X - FLAG_SIZE.width;
-            flag_x = self.bounds.size.width - 4.0 - FLAG_SIZE.width;
-        }
-        
-        [flagImage drawInRect:CGRectMake(flag_x, bubbleFrame.origin.y + bubbleFrame.size.height - FLAG_SIZE.height, FLAG_SIZE.width, FLAG_SIZE.height)];
+        [flagImage drawInRect:CGRectMake(flag_x, bubbleFrame.origin.y + 3.0, FLAG_SIZE.width, FLAG_SIZE.height)];
         
         //文字
         UIFont* fromTextFont = [_translation fontForType:BFT_FROMTEXT];
         CGSize fromTextSize = [_translation getFromTextSize];
-        
-        if(CLT_LEFT == type)
-        {
-            text_x = MAX(BUBBLE_PADDING_LEFT,(MIN_BUBBLE_WIDTH - fromTextSize.width)/2.0);
-        }
-        else if(CLT_RIGHT == type)
-        {
-            text_x = MAX(BUBBLE_PADDING_RIGHT,(MIN_BUBBLE_WIDTH - fromTextSize.width)/2.0);
-        }
-        
+        text_x = BUBBLE_PADDING_LEFT + 3.0f;
 
-        CGRect fromTextRect = CGRectMake(bubble_x + text_x, marginTop +BUBBLE_PADDING_TOP, fromTextSize.width, fromTextSize.height);
+        CGRect fromTextRect = CGRectMake(bubble_x + text_x, marginTop + (bubbleFrame.size.height - fromTextSize.height)/2.0, fromTextSize.width, fromTextSize.height);
         [fromText drawInRect:fromTextRect withFont:fromTextFont lineBreakMode:NSLineBreakByWordWrapping alignment:alignment];
     }
     
@@ -180,15 +159,15 @@
         
         //国旗
         UIImage* flagImage = [UIImage imageNamed:[NSString stringWithFormat:@"flag_%@",_translation.toCode]];
-        flag_x = self.bounds.size.width - 4.0 - FLAG_SIZE.width;
-        [flagImage drawInRect:CGRectMake(flag_x, toBubbleFrame.origin.y + toBubbleFrame.size.height - FLAG_SIZE.height, FLAG_SIZE.width, FLAG_SIZE.height)];
+        flag_x = toBubbleFrame.origin.x - FLAG_SIZE.width - 4.0;
+        [flagImage drawInRect:CGRectMake(flag_x, toBubbleFrame.origin.y + 3.0, FLAG_SIZE.width, FLAG_SIZE.height)];
         
         //文字
         UIFont* toTextFont = [_translation fontForType:BFT_TOTEXT];
         CGSize toTextSize = [_translation getToTextSize];
-        text_x = MAX(BUBBLE_PADDING_RIGHT,(MIN_BUBBLE_WIDTH - toTextSize.width - 4)/2.0);
+        text_x = BUBBLE_PADDING_LEFT - 3.0;
         
-        CGRect toTextRect = CGRectMake(bubble_x + text_x, marginTop + fromBubbleSize.height + BUBBLE_FROM_TO_INTERVAL + BUBBLE_PADDING_TOP, toTextSize.width, toTextSize.height);
+        CGRect toTextRect = CGRectMake(bubble_x + text_x, marginTop + fromBubbleSize.height + BUBBLE_FROM_TO_INTERVAL + (toBubbleFrame.size.height - toTextSize.height)/2.0, toTextSize.width, toTextSize.height);
         [toText drawInRect:toTextRect withFont:toTextFont lineBreakMode:NSLineBreakByWordWrapping alignment:alignment];
     }
 
@@ -202,7 +181,7 @@
         {
             [[UIColor grayColor] set];
             UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:12];
-            CGRect rect = CGRectMake(10, BUBBLE_MARGIN_TOP - 8, [RCTool getScreenSize].width - 20, 20);
+            CGRect rect = CGRectMake(10, BUBBLE_MARGIN_TOP + 12, [RCTool getScreenSize].width - 20, 20);
             NSString* temp = [NSString stringWithFormat:@"%@",dateString];
             [temp drawInRect:rect withFont:font lineBreakMode:NSLineBreakByTruncatingTail alignment:NSTextAlignmentCenter];
         }

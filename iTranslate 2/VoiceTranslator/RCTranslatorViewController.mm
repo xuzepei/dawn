@@ -14,6 +14,7 @@
 #import "RCSettingViewController.h"
 #import "RCTranslationCell.h"
 #import "RCHintMaskView.h"
+#import "RCMagnifyViewController.h"
 
 #define RECORD_BUTTON_WIDTH 60.0
 #define RECORD_BUTTON_HEIGHT 60.0
@@ -180,9 +181,13 @@
 {
     if(nil == _titleBar)
     {
+        //screen with: 320,375,414
+        
         CGFloat width = 240.0f;
-        if([RCTool getScreenSize].width > 320)
+        if([RCTool getScreenSize].width >= 414)
             width = 360.0f;
+        else if([RCTool getScreenSize].width > 320)
+            width = 295.0f;
         
         _titleBar = [[RCTitleBar alloc] initWithFrame:CGRectMake(0, 0, width, 44)];
     }
@@ -211,9 +216,9 @@
 {
     if(nil == _tableView)
     {
-        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-        if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-            height = [RCTool getScreenSize].height - self.adHeight;
+        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+        if([RCTool systemVersion] >= 7.0)
+            height = [RCTool getScreenSize].height;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStylePlain];
@@ -274,7 +279,12 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
 {
     if(0 == section)
-        return RECORD_BUTTON_HEIGHT + 20.0;
+    {
+        if([RCTool isIpad])
+            return 90.0f;
+        else
+            return 50.0;
+    }
     
     return 0.0;
 }
@@ -1127,6 +1137,8 @@
     if(_tipLabel && _tipLabel.superview)
         [_tipLabel removeFromSuperview];
     
+    [[UIMenuController sharedMenuController] setMenuItems:nil];
+    
     if(translation && NO == [translation.isLoading boolValue])
     {
         self.isEditing = YES;
@@ -1183,15 +1195,25 @@
 {
     if(nil == translation)
         return;
+//    if(nil == _magnifyView)
+//    {
+//        _magnifyView = [[RCMagnifyView alloc] initWithFrame:CGRectZero];
+//    }
+//    
+//    _magnifyView.frame = CGRectMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0,0,0);
+//    [_magnifyView updateContent:translation type:type];
+//    [[RCTool frontWindow] addSubview:_magnifyView];
     
-    if(nil == _magnifyView)
+    
+    if(translation)
     {
-        _magnifyView = [[RCMagnifyView alloc] initWithFrame:CGRectZero];
+        RCMagnifyViewController* vc = [[[RCMagnifyViewController alloc] initWithNibName:nil bundle:nil] autorelease];
+        [vc updateContent:translation bubbleType:type];
+        UINavigationController* nv = [[[UINavigationController alloc] initWithRootViewController:vc] autorelease];
+        nv.navigationBar.barTintColor = [UIColor blackColor];
+        [self presentViewController:nv animated:YES completion:nil];
     }
     
-    _magnifyView.frame = CGRectMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0,0,0);
-    [_magnifyView updateContent:translation type:type];
-    [[RCTool frontWindow] addSubview:_magnifyView];
 }
 
 - (void)deleteItem:(Translation*)translation

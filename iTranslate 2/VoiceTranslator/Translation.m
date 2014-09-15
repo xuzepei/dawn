@@ -85,9 +85,11 @@
         return CGSizeZero;
     
     CGFloat width = [RCTool getScreenSize].width * 0.65f;
-    return [text sizeWithFont:font
-           constrainedToSize:CGSizeMake(width, CGFLOAT_MAX)
-               lineBreakMode:NSLineBreakByWordWrapping];
+    CGSize size = [text sizeWithFont:font
+     constrainedToSize:CGSizeMake(width, CGFLOAT_MAX)
+         lineBreakMode:NSLineBreakByWordWrapping];
+    size = CGSizeMake(size.width + 4.0, size.height);
+    return size;
 }
 
 - (UIFont*)fontForType:(BUBBLE_FONT_TYPE)type

@@ -9,7 +9,7 @@
 #import "RCEditView.h"
 #import "RCTool.h"
 
-#define TEXTVIEW_RECT CGRectMake(12,6,292,114)
+#define TEXTVIEW_RECT CGRectMake(12,6,[RCTool getScreenSize].width - 28,114)
 #define BG_COLOR [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]
 
 #define ROUND_CORNER_RECT CGRectMake(10,2,[RCTool getScreenSize].width - 20,120)
