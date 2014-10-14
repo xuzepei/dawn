@@ -10,7 +10,6 @@
 #import "RCTool.h"
 #import "RCSwitchCell.h"
 #import "RCChooseLanguageViewController.h"
-#import "RCHelpViewController.h"
 #import "RCSliderCell.h"
 #import "RCImageLoader.h"
 
@@ -53,9 +52,9 @@ typedef enum {
 
 - (void)dealloc
 {
-    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
-    self.productsRequest.delegate = nil;
-    self.productsRequest = nil;
+//    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+//    self.productsRequest.delegate = nil;
+//    self.productsRequest = nil;
     
     self.tableView = nil;
     self.itemArray = nil;
@@ -71,8 +70,8 @@ typedef enum {
     if(_tableView)
         [_tableView reloadData];
     
-    if([self checkEnableIAP] && nil == self.removeAdProduct)
-        [self requestProductData];
+//    if([self checkEnableIAP] && nil == self.removeAdProduct)
+//        [self requestProductData];
 }
 
 - (void)viewDidLoad
@@ -354,14 +353,14 @@ typedef enum {
                                            reuseIdentifier: cellId7] autorelease];
             cell.accessoryType = UITableViewCellAccessoryNone;
             
-            if(self.removeAdProduct)
-            {
-                cell.textLabel.text = self.removeAdProduct.localizedTitle;
-            }
-            else
-            {
-                cell.textLabel.text = NSLocalizedString(@"Remove Advertisement",@"");
-            }
+//            if(self.removeAdProduct)
+//            {
+//                cell.textLabel.text = self.removeAdProduct.localizedTitle;
+//            }
+//            else
+//            {
+//                cell.textLabel.text = NSLocalizedString(@"Remove Advertisement",@"");
+//            }
             
             cell.imageView.image = [UIImage imageNamed:@"adblock"];
         }
@@ -477,10 +476,6 @@ typedef enum {
     {
         if(0 == indexPath.row)
         {
-
-            RCHelpViewController* temp = [[RCHelpViewController alloc] initWithNibName:nil bundle:nil];
-            [self.navigationController pushViewController:temp animated:YES];
-            [temp release];
         }
         else if(1 == indexPath.row)
         {
@@ -516,14 +511,14 @@ typedef enum {
     }
     else if(PURCHASE_TAG == actionSheet.tag)
     {
-        if(0 == buttonIndex)
-        {
-            [self buyProduct:self.removeAdProduct];
-        }
-        else
-        {
-            [self restoreProduct];
-        }
+//        if(0 == buttonIndex)
+//        {
+//            [self buyProduct:self.removeAdProduct];
+//        }
+//        else
+//        {
+//            [self restoreProduct];
+//        }
     }
 }
 
@@ -587,6 +582,12 @@ typedef enum {
     }
 }
 
+- (void)succeedLoad:(id)result token:(id)token
+{
+    [self.tableView reloadData];
+}
+
+/*
 #pragma mark - In App Purchase
 
 - (BOOL)checkEnableIAP
@@ -765,6 +766,6 @@ typedef enum {
     [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
     
 }
-
+*/
 
 @end

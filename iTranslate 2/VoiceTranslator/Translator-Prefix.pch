@@ -136,7 +136,7 @@ typedef enum {
 #define UMENG_APP_KEY @"53b0dce956240b6b0705873e"
 
 //获取协同信息URL
-#define APP_INFO_URL @"http://www.tapguilt.com/api/translator.php?v=1.7"
+#define APP_INFO_URL @"http://www.tapguilt.com/api/translator.php?v=1.8"
 
 //密钥
 #define SECRET_KEY @"20140711"

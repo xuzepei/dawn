@@ -31,6 +31,8 @@
 
 #define AD_HEIGHT kGADAdSizeBanner.size.height
 
+#define INPUT_BAR_HEIGHT 45.0f
+
 @interface RCTranslatorViewController ()
 
 @end
@@ -69,6 +71,7 @@
                                                    object:nil];
         
     }
+    
     return self;
 }
 
@@ -97,7 +100,7 @@
     
     self.actionMenu = nil;
     self.selectedTranslation = nil;
-    self.editView = nil;
+    self.inputBar = nil;
     
     self.magnifyView = nil;
     self.loadingImageView = nil;
@@ -118,45 +121,22 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-    if(self.goToSettings)
-    {
-        [self clickedSpaceArea:nil];
-        self.goToSettings = NO;
-    }
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+    // Do any additional setup after loading the view.
     
     self.view.backgroundColor = BG_COLOR;
     
     [self.navigationController.navigationBar addSubview:_settingButton];
-    
-    UIView* adView = [RCTool getAdView];
-    if(adView.superview)
-        self.adHeight = 50.0;
-    else
-        self.adHeight = 0.0f;
 
     [self initTableView];
     
     [self initTitleBar];
     
-    [self initTipLabel];
-    
-    
-//    if([RCTool getShowHintMask])
-//    {
-//        [RCTool setShowHintMask:NO];
-//        
-//        RCHintMaskView* maskView = [[[RCHintMaskView alloc] initWithFrame:[RCTool getScreenRect]] autorelease];
-//        [[RCTool frontWindow] addSubview:maskView];
-//        
-//        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent animated:YES];
-//    }
+    [self initInputBar];
 }
 
 - (void)didReceiveMemoryWarning
@@ -216,9 +196,9 @@
 {
     if(nil == _tableView)
     {
-        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+        CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - INPUT_BAR_HEIGHT;
         if([RCTool systemVersion] >= 7.0)
-            height = [RCTool getScreenSize].height;
+            height = [RCTool getScreenSize].height - INPUT_BAR_HEIGHT;
         
         _tableView = [[UITableView alloc] initWithFrame: CGRectMake(0,0,[RCTool getScreenSize].width,height)
                                                   style:UITableViewStylePlain];
@@ -235,15 +215,15 @@
             [_itemArray addObjectsFromArray:translations]
             ;
         
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapOnTableView:)];
-        [self.tableView addGestureRecognizer:tap];
+//        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapOnTableView:)];
+//        [self.tableView addGestureRecognizer:tap];
     }
-	
+    
     [_tableView reloadData];
     [self scrollToBottomAnimated:YES];
-	[self.view addSubview:_tableView];
+    [self.view addSubview:_tableView];
     
-
+    
 }
 
 - (id)getCellDataAtIndexPath:(NSIndexPath*)indexPath
@@ -251,18 +231,18 @@
     if(indexPath.row < [_itemArray count])
         return [_itemArray objectAtIndex: indexPath.row];
     
-	return nil;
+    return nil;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	return 1;
+    return 1;
 }
 
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return [_itemArray count];
+    return [_itemArray count];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -273,7 +253,7 @@
         return [translation getHeightForCell:YES];
     }
     
-	return 0.0;
+    return 0.0;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
@@ -297,9 +277,9 @@
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-	static NSString *cellId = @"cellId";
-	
-	UITableViewCell *cell = nil;
+    static NSString *cellId = @"cellId";
+    
+    UITableViewCell *cell = nil;
     cell = [tableView dequeueReusableCellWithIdentifier:cellId];
     if(nil == cell)
     {
@@ -326,8 +306,8 @@
 
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	
-	[tableView deselectRowAtIndexPath: indexPath animated: YES];
+    
+    [tableView deselectRowAtIndexPath: indexPath animated: YES];
 }
 
 - (void)scrollToBottomAnimated:(BOOL)animated
@@ -349,321 +329,7 @@
     if (indexPath) { //we are in a tableview cell, let the gesture be handled by the view
         recognizer.cancelsTouchesInView = NO;
     } else {
-        [self editText:nil];
-    }
-}
-
-#pragma mark - Level Meter
-
-- (void)initLevelMeter
-{
-    CGFloat y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 62 - self.adHeight;
-    
-    if(nil == _leftLevelMeter)
-    {
-        _leftLevelMeter = [[AQLevelMeter alloc] initWithFrame:CGRectMake(0, 0, RECORD_BUTTON_WIDTH, LEVEL_METER_HEIGHT)];
-        
-        _leftLevelMeter.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
-        
-        UIColor *bgColor = [[UIColor alloc] initWithRed:.39 green:.44 blue:.57 alpha:0];
-        [_leftLevelMeter setBackgroundColor:bgColor];
-        [_leftLevelMeter setBorderColor:bgColor];
-        [bgColor release];
-    }
-    
-    [self.view addSubview: _leftLevelMeter];
-    
-//    if(nil == _rightLevelMeter)
-//    {
-//        _rightLevelMeter = [[AQLevelMeter alloc] initWithFrame:CGRectMake(0, 0, RECORD_BUTTON_WIDTH, LEVEL_METER_HEIGHT)];
-//        
-//        _rightLevelMeter.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
-//        
-//        UIColor *bgColor = [[UIColor alloc] initWithRed:.39 green:.44 blue:.57 alpha:0];
-//        [_rightLevelMeter setBackgroundColor:bgColor];
-//        [_rightLevelMeter setBorderColor:bgColor];
-//        [bgColor release];
-//        
-////        _rightLevelMeter.layer.transform = CATransform3DMakeRotation(180.0 / 180.0 * M_PI, 0.0, 0.0, 1.0);
-//    }
-//    
-//    [self.view addSubview: _rightLevelMeter];
-}
-
-- (void)willStartRecording:(id)token
-{
-    if(_recordController)
-    {
-        if(_recordController.recorder)
-        {
-            if(RBT_LEFT == _recordController.type)
-            {
-                [_leftLevelMeter setAq:_recordController.recorder->Queue()];
-            }
-            else if(RBT_RIGHT == _recordController.type)
-            {
-                [_leftLevelMeter setAq:_recordController.recorder->Queue()];
-            }
-        }
-    }
-}
-
-- (void)willStopRecording:(id)token
-{
-    if(_recordController)
-    {
-        if(RBT_LEFT == _recordController.type)
-        {
-            [_leftLevelMeter setAq:nil];
-        }
-        else if(RBT_RIGHT == _recordController.type)
-        {
-            [_leftLevelMeter setAq:nil];
-        }
-    }
-}
-
-#pragma mark - Record Button
-
-- (void)initRecordButton
-{
-//    RCMaskView* maskView = [[[RCMaskView alloc] initWithFrame:CGRectMake(0, [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - RECORD_BUTTON_HEIGHT - 20 , [RCTool getScreenSize].width, RECORD_BUTTON_HEIGHT + 20)] autorelease];
-//    [self.view addSubview: maskView];
-    
-    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - self.adHeight;
-    
-    if(nil == _firstRecordButton)
-    {
-        _firstRecordButton = [[RCRecordButton alloc] initWithFrame:CGRectZero];
-        _firstRecordButton.tag = RBT_LEFT;
-        _firstRecordButton.delegate = self;
-        _firstRecordButton.selector = @selector(clickedFirstRecordButton:);
-        _firstRecordButton.frame = CGRectMake(60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
-    }
-    
-    [self.view addSubview: _firstRecordButton];
-    
-    
-    if(nil == _secondRecordButton)
-    {
-        _secondRecordButton = [[RCRecordButton alloc] initWithFrame:CGRectZero];
-        _secondRecordButton.tag = RBT_RIGHT;
-        _secondRecordButton.delegate = self;
-        _secondRecordButton.selector = @selector(clickedSecondRecordButton:);
-        _secondRecordButton.frame = CGRectMake([RCTool getScreenSize].width - RECORD_BUTTON_WIDTH - 60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
-    }
-    
-    [self.view addSubview: _secondRecordButton];
-}
-
-- (void)initRecordController
-{
-    if(nil == _recordController)
-    {
-        _recordController = [[RCRecordController alloc] init];
-        [_recordController initRecorder];
-        _recordController.delegate = self;
-    }
-}
-
-- (void)clickedRecordButton:(NSString*)fromLanguage toLanguage:(NSString*)toLanguage buttonTag:(RECORD_BUTTON_TYPE)buttonTag
-{
-    NSLog(@"clickedRecordButton");
-    
-    if(self.isTranslating)
-        return;
-    
-    if(_recordController)
-    {
-        _settingButton.enabled = YES;
-        if([_recordController isRecording])
-        {    
-            NSString* recordFilename = [_recordController.filename copy];
-            [_recordController stop];
-            
-            [RCTool playSound:@"record_end.wav"];
-            
-            [self updateTipLabelByStep:2];
-            
-            if(_recordController.type != buttonTag)
-            {
-                if(recordFilename)
-                    [recordFilename release];
-            }
-            else
-            {
-                if(NO == [_recordController isRecording])
-                {
-                    if(RBT_LEFT == _recordController.type)
-                    {
-                        _firstRecordButton.isRecording = NO;
-                        [_firstRecordButton setNeedsDisplay];
-                    }
-                    else if(RBT_RIGHT == _recordController.type)
-                    {
-                        _secondRecordButton.isRecording = NO;
-                        [_secondRecordButton setNeedsDisplay];
-                    }
-                }
-                
-                RCTranslateProcess* temp = [RCTranslateProcess sharedInstance];
-                NSMutableDictionary* token = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:_recordController.type],@"type",recordFilename,@"filename",nil];
-                BOOL b = [temp translate:[RCTool getRecordFilePath:recordFilename] fromLanguage:fromLanguage toLanguage:toLanguage delegate:self token:token];
-                if(b)
-                {
-                    if(RBT_LEFT == _recordController.type)
-                    {
-                        _firstRecordButton.isRecording = NO;
-                        [_firstRecordButton setNeedsDisplay];
-                    }
-                    else if(RBT_RIGHT == _recordController.type)
-                    {
-                        _secondRecordButton.isRecording = NO;
-                        [_secondRecordButton setNeedsDisplay];
-                    }
-                }
-                
-                if(recordFilename)
-                    [recordFilename release];
-                return;
-            }
-            
-        }
-        
-        [RCTool playSound:@"record_begin.wav"];
-        
-        NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:fromLanguage,@"code",[NSNumber numberWithInt:buttonTag],@"tag",nil];
-        [self performSelector:@selector(startToRecord:) withObject:dict afterDelay:0.5];
-    }
-}
-
-- (void)startToRecord:(id)agrument
-{
-    NSDictionary* dict = (NSDictionary*)agrument;
-    AVAudioSession * sharedSession = [AVAudioSession sharedInstance];
-    [sharedSession setCategory:AVAudioSessionCategoryRecord error:NULL];
-    [sharedSession setActive:YES error:NULL];
-    
-    _recordController.language = [dict objectForKey:@"code"];
-    _recordController.type = (RECORD_BUTTON_TYPE)[[dict objectForKey:@"tag"] intValue];
-    [_recordController record:[RCTool createRecordFilename]];
-    
-    if([_recordController isRecording])
-    {
-        _settingButton.enabled = NO;
-        if(RBT_LEFT == _recordController.type)
-        {
-            _firstRecordButton.isRecording = YES;
-            [_firstRecordButton setNeedsDisplay];
-            
-            _secondRecordButton.isRecording = NO;
-            [_secondRecordButton setNeedsDisplay];
-        }
-        else if(RBT_RIGHT == _recordController.type)
-        {
-            _firstRecordButton.isRecording = NO;
-            [_firstRecordButton setNeedsDisplay];
-            
-            _secondRecordButton.isRecording = YES;
-            [_secondRecordButton setNeedsDisplay];
-        }
-        
-    }
-}
-
-- (void)detectEndOfSpeech:(NSNotification*)notification
-{
-    [self updateTipLabelByStep:2];
-    
-    if(_recordController)
-    {
-        _settingButton.enabled = YES;
-        if([_recordController isRecording])
-        {
-            NSString* fromLanguage = @"";
-            NSString* toLanguage = @"";
-            NSString* recordFilename = [_recordController.filename copy];
-            [_recordController stop];
-            
-            [RCTool playSound:@"record_end.wav"];
-            
-            if(NO == [_recordController isRecording])
-            {
-                if(RBT_LEFT == _recordController.type)
-                {
-                    fromLanguage = _firstRecordButton.language;
-                    toLanguage = _firstRecordButton.toLanguage;
-                    _firstRecordButton.isRecording = NO;
-                    [_firstRecordButton setNeedsDisplay];
-                }
-                else if(RBT_RIGHT == _recordController.type)
-                {
-                    fromLanguage = _secondRecordButton.language;
-                    toLanguage = _secondRecordButton.toLanguage;
-                    _secondRecordButton.isRecording = NO;
-                    [_secondRecordButton setNeedsDisplay];
-                }
-            }
-            
-            RCTranslateProcess* temp = [RCTranslateProcess sharedInstance];
-            NSMutableDictionary* token = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:_recordController.type],@"type",recordFilename,@"filename",nil];
-            BOOL b = [temp translate:[RCTool getRecordFilePath:recordFilename] fromLanguage:fromLanguage toLanguage:toLanguage delegate:self token:token];
-            if(b)
-            {
-                if(RBT_LEFT == _recordController.type)
-                {
-                    _firstRecordButton.isRecording = NO;
-                    [_firstRecordButton setNeedsDisplay];
-                }
-                else if(RBT_RIGHT == _recordController.type)
-                {
-                    _secondRecordButton.isRecording = NO;
-                    [_secondRecordButton setNeedsDisplay];
-                }
-            }
-            
-            if(recordFilename)
-                [recordFilename release];
-            return;  
-        }
-        
-    }
-}
-
-#pragma mark - RCRecordButtonSelector
-
-- (void)clickedFirstRecordButton:(id)token
-{
-
-    NSDictionary* dict = (NSDictionary*)token;
-    NSString* touchEvent = [dict objectForKey:@"touch_event"];
-    NSString* fromLanguage = [dict objectForKey:@"language"];
-    NSString* toLanguage = [dict objectForKey:@"to_language"];
-    if([touchEvent length] && [touchEvent isEqualToString:@"touch_end"])
-    {
-        [self updateTipLabelByStep:1];
-        NSLog(@"clickedFirstRecordButton");
-        [self clickedRecordButton:fromLanguage toLanguage:toLanguage buttonTag:RBT_LEFT];
-    }
-}
-
-- (void)clickedSecondRecordButton:(id)token
-{
- 
-    NSDictionary* dict = (NSDictionary*)token;
-    NSString* touchEvent = [dict objectForKey:@"touch_event"];
-    NSString* fromLanguage = [dict objectForKey:@"language"];
-    NSString* toLanguage = [dict objectForKey:@"to_language"];
-    
-    if([touchEvent length] && [touchEvent isEqualToString:@"touch_end"])
-    {
-        [self updateTipLabelByStep:1];
-        NSLog(@"clickedSecondRecordButton");
-        [self clickedRecordButton:fromLanguage toLanguage:toLanguage buttonTag:RBT_RIGHT];
+        //[self editText:nil];
     }
 }
 
@@ -823,16 +489,16 @@
         int type = [[dict objectForKey:@"type"] intValue];
         if(RBT_LEFT == type)
         {
-//            if(_firstRecordButton)
-//                [_firstRecordButton startIndicator];
+            //            if(_firstRecordButton)
+            //                [_firstRecordButton startIndicator];
             
             [self addLoadingView];
             
         }
         else if(RBT_RIGHT == type)
         {
-//            if(_secondRecordButton)
-//                [_secondRecordButton startIndicator];
+            //            if(_secondRecordButton)
+            //                [_secondRecordButton startIndicator];
             
             [self addLoadingView];
         }
@@ -1009,19 +675,14 @@
     self.selectedBubbleType = type;
     self.selectedTranslation = translation;
     [[UIMenuController sharedMenuController] setMenuVisible:YES animated:YES];
-//    [self addActionMenu:point];
-//    [_actionMenu updateContent:type translation:translation orientation:orientation];
+    //    [self addActionMenu:point];
+    //    [_actionMenu updateContent:type translation:translation orientation:orientation];
 }
 
 - (void)clickedSpaceArea:(id)token
 {
-    if(self.isEditing)
-        return;
-    
-    if(_actionMenu)
-        [_actionMenu fold];
-    
-    [self editText:nil];
+    if(_inputBar)
+        [_inputBar.tf resignFirstResponder];
 }
 
 - (void)clickedMenuItem:(ACTION_TYPE)actionType bubbleType:(BUBBLE_TYPE)bubbleType translation:(Translation*)translation
@@ -1033,7 +694,7 @@
     
     if(AT_COPY == actionType)
     {
-    
+        
         NSString* text = nil;
         if(BT_FROM == bubbleType)
             text = translation.fromText;
@@ -1044,7 +705,7 @@
     }
     else if(AT_SPEAK == actionType)
     {
-
+        
         if(BT_FROM == bubbleType)
         {
             if(0 == [translation.fromVoice length])
@@ -1063,7 +724,7 @@
     }
     else if(AT_EDIT == actionType)
     {
-
+        
         if(BT_FROM == bubbleType)
         {
             [self editText:translation];
@@ -1071,12 +732,12 @@
     }
     else if(AT_MAGNIFY == actionType)
     {
-
+        
         [self magnify:translation type:bubbleType];
     }
     else if(AT_DELETE == actionType)
     {
-  
+        
         self.selectedTranslation = translation;
         
         UIAlertView* alert = [[UIAlertView alloc] initWithTitle: NSLocalizedString(@"Hint", @"")
@@ -1088,7 +749,7 @@
         [alert show];
         [alert release];
         
-
+        
     }
     else if(AT_SHARE == actionType)
     {
@@ -1134,18 +795,13 @@
 
 - (void)editText:(Translation*)translation
 {
-    if(_tipLabel && _tipLabel.superview)
-        [_tipLabel removeFromSuperview];
-    
     [[UIMenuController sharedMenuController] setMenuItems:nil];
     
     if(translation && NO == [translation.isLoading boolValue])
     {
         self.isEditing = YES;
         self.settingButton.enabled = NO;
-        [self initEditView];
-        [self.view addSubview:_editView];
-        [_editView updateContent:translation];
+        [_inputBar updateContent:translation];
     }
     else
     {
@@ -1157,16 +813,10 @@
             translation.time = [NSNumber numberWithDouble:interval];
             translation.fromCode = [RCTool getLeftLanguage];
             translation.toCode = [RCTool getRightLanguage];
-            //translation.fromVoice = self.recordFilePath;
-            //translation.fromText = text;
-            //translation.align = [self.token objectForKey:@"type"];
         }
         
         self.isEditing = YES;
-        //self.settingButton.enabled = NO;
-        [self initEditView];
-        [self.view addSubview:_editView];
-        [_editView updateContent:translation];
+        [_inputBar updateContent:translation];
     }
 }
 
@@ -1195,14 +845,14 @@
 {
     if(nil == translation)
         return;
-//    if(nil == _magnifyView)
-//    {
-//        _magnifyView = [[RCMagnifyView alloc] initWithFrame:CGRectZero];
-//    }
-//    
-//    _magnifyView.frame = CGRectMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0,0,0);
-//    [_magnifyView updateContent:translation type:type];
-//    [[RCTool frontWindow] addSubview:_magnifyView];
+    //    if(nil == _magnifyView)
+    //    {
+    //        _magnifyView = [[RCMagnifyView alloc] initWithFrame:CGRectZero];
+    //    }
+    //
+    //    _magnifyView.frame = CGRectMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0,0,0);
+    //    [_magnifyView updateContent:translation type:type];
+    //    [[RCTool frontWindow] addSubview:_magnifyView];
     
     
     if(translation)
@@ -1256,7 +906,7 @@
     
     if([RCTool systemVersion] >= 6.0)
     {
-//        if([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook])
+        //        if([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook])
         {
             SLComposeViewController* slComposerSheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
             
@@ -1264,7 +914,7 @@
             [self presentViewController:slComposerSheet animated:YES completion:nil];
             
             [slComposerSheet setCompletionHandler:^(SLComposeViewControllerResult result) {
-
+                
                 if (result != SLComposeViewControllerResultCancelled)
                 {
                     [RCTool showAlert:@"Facebook Message" message:@"Post Successfully."];
@@ -1395,7 +1045,7 @@
         // We must always check whether the current device is configured for sending emails
         if ([mailClass canSendMail])
         {
-    MFMailComposeViewController *mailComposeViewController = [[MFMailComposeViewController alloc] init];
+            MFMailComposeViewController *mailComposeViewController = [[MFMailComposeViewController alloc] init];
             mailComposeViewController.navigationBar.tintColor = NAVIGATION_BAR_COLOR;
             mailComposeViewController.mailComposeDelegate = self;
             [mailComposeViewController setSubject:@""];
@@ -1414,7 +1064,7 @@
 }
 
 - (void)mailComposeController:(MFMailComposeViewController*)controller
-		  didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+          didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
     [self dismissViewControllerAnimated:YES completion:nil];
     
@@ -1465,181 +1115,76 @@
     }
 }
 
-#pragma mark - EditView
-
-- (void)initEditView
-{
-    if(nil == _editView)
-    {
-        _editView = [[RCEditView alloc] initWithFrame:EDIT_VIEW_RECT];
-        _editView.delegate = self;
-    }
-}
-
-#pragma mark - Tip Label
-
-- (void)initTipLabel
-{
-    if(NO == [RCTool getShowTipLabel])
-        return;
-    
-    [RCTool setShowTipLabel:NO];
-    
-    CGFloat y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 82 - self.adHeight;
-    
-    if(nil == _tipLabel)
-    {
-        _tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 300, 20)];
-        _tipLabel.backgroundColor = [UIColor clearColor];
-        _tipLabel.center = CGPointMake([RCTool getScreenSize].width/2.0, [RCTool getScreenSize].height/2.0);
-        _tipLabel.textColor = [UIColor grayColor];
-        _tipLabel.font = [UIFont systemFontOfSize:14];
-        _tipLabel.textAlignment = NSTextAlignmentCenter;
-        [self updateTipLabelByStep:0];
-    }
-    
-    [self.view addSubview: _tipLabel];
-}
-
-- (void)updateTipLabelByStep:(int)stepIndex
-{
-    if(nil == _tipLabel)
-        return;
-    
-    NSString* tip = nil;
-    
-    switch (stepIndex) {
-        case 0:
-            tip = @"Please click blank area to input";
-            break;
-        case 1:
-            tip = @"Say to the microphone";
-            break;
-        case 2:
-        {
-            tip = @"";
-            [_tipLabel removeFromSuperview];
-            self.tipLabel = nil;
-            break;
-        }
-        default:
-            break;
-    }
-    
-    _tipLabel.text = tip;
-}
-
 #pragma mark - Keyboard notification
 
 - (void)keyboardWillShow: (NSNotification*)notification
 {
-	NSDictionary *userInfo = [notification userInfo];
-	NSValue* aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-	CGRect keyboardRect = [aValue CGRectValue];
-	
-    if(_isEditing)
-    {
-        _editView.alpha = 0.0;
-        CGRect rect = _editView.frame;
+    NSDictionary *userInfo = [notification userInfo];
+    NSValue* aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+    CGRect keyboardRect = [aValue CGRectValue];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        
+        CGRect rect = _inputBar.frame;
         CGFloat y = [RCTool getScreenSize].height - keyboardRect.size.height - rect.size.height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
         if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
             y = [RCTool getScreenSize].height - keyboardRect.size.height - rect.size.height;
         rect.origin.y = y;
-        _editView.frame = rect;
+        _inputBar.frame = rect;
         
-        [UIView animateWithDuration:0.3 animations:^{
-            
-            _editView.alpha = 1.0;
-            
-        } completion:^(BOOL finished) {
-
-        }];
-    }
+        UIView* adView = [RCTool getAdView];
+        if(adView.alpha > 0 && adView.superview)
+        {
+            CGRect adRect = adView.frame;
+            adRect.origin.y = rect.origin.y - adRect.size.height;
+            adView.frame = adRect;
+        }
+        
+        
+    } completion:^(BOOL finished) {
+        
+    }];
 }
 
 - (void)keyboardWillHide: (NSNotification*)notification
 {
-//    NSDictionary *userInfo = [notification userInfo];
-//	NSValue* aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-//	CGRect keyboardRect = [aValue CGRectValue];
-
-    if(_editView && _editView.alpha)
+    //    NSDictionary *userInfo = [notification userInfo];
+    //	NSValue* aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+    //	CGRect keyboardRect = [aValue CGRectValue];
+    
+    if(_inputBar)
     {
         self.isEditing = NO;
         [UIView animateWithDuration:0.3 animations:^{
-            _editView.alpha = 0.0;
-        } completion:^(BOOL finished) {
             
-            _editView.frame = EDIT_VIEW_RECT;
-            [_editView removeFromSuperview];
+            CGRect rect = _inputBar.frame;
+            CGFloat y = [RCTool getScreenSize].height - rect.size.height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT;
+            if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
+                y = [RCTool getScreenSize].height - rect.size.height;
+            rect.origin.y = y;
+            _inputBar.frame = rect;
+            
+            UIView* adView = [RCTool getAdView];
+            if(adView.alpha > 0 && adView.superview)
+            {
+                CGRect adRect = adView.frame;
+                adRect.origin.y = rect.origin.y - adRect.size.height;
+                adView.frame = adRect;
+            }
+            
+        } completion:^(BOOL finished) {
+
             _isEditing = NO;
-            _editView.alpha = 0.0;
         }];
     }
 }
 
-- (void)rearrange
-{
-    UIView* adView = [RCTool getAdView];
-    if(adView.superview)
-        self.adHeight = 50.0;
-    else
-        self.adHeight = 0.0f;
-    
-    CGFloat height = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0)
-        height = [RCTool getScreenSize].height;
-    _tableView.frame = CGRectMake(0,0,[RCTool getScreenSize].width,height);
-    
-    CGFloat y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - 4 - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - RECORD_BUTTON_HEIGHT - 4 - self.adHeight;
-    
-    if(_firstRecordButton)
-    {
-        _firstRecordButton.frame = CGRectMake(60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
-    }
-
-    if(_secondRecordButton)
-    {
-        _secondRecordButton.frame = CGRectMake([RCTool getScreenSize].width - RECORD_BUTTON_WIDTH - 60, y, RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT);
-    }
-    
-    y = [RCTool getScreenSize].height - 62 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 62 - self.adHeight;
-    
-    if(_leftLevelMeter)
-    {
-        _leftLevelMeter.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
-    }
-    
-    y = [RCTool getScreenSize].height - 82 -  STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - self.adHeight;
-    if([RCTool systemVersion] >= 7.0 && ISFORIOS7)
-        y = [RCTool getScreenSize].height - 82 - self.adHeight;
-    
-    if(_tipLabel)
-    {
-        _tipLabel.center = CGPointMake([RCTool getScreenSize].width/2.0, y);
-    }
-}
-
-- (void)removeAD:(NSNotification*)notifcation
-{
-    UIView* adView = [RCTool getAdView];
-    if(adView && adView.superview)
-    {
-        [adView removeFromSuperview];
-    }
-    
-    [self rearrange];
-}
-
 - (void)addAD:(NSNotification*)notifcation
 {
-    [self rearrange];
+    UIView* adView = [RCTool getAdView];
+    CGRect adRect = adView.frame;
+    adRect.origin.y = _inputBar.frame.origin.y - adRect.size.height;
+    adView.frame = adRect;
 }
 
 
@@ -1692,6 +1237,23 @@
 - (IBAction)menuAction6:(id)sender
 {
     NSLog(@"test");
+}
+
+#pragma mark - Input Bar
+
+- (void)initInputBar
+{
+    if(nil == _inputBar)
+    {
+        CGFloat y = [RCTool getScreenSize].height - STATUS_BAR_HEIGHT - NAVIGATION_BAR_HEIGHT - INPUT_BAR_HEIGHT;
+        if([RCTool systemVersion] >= 7.0)
+            y = [RCTool getScreenSize].height - INPUT_BAR_HEIGHT;
+        
+        _inputBar = [[RCInputBar alloc] initWithFrame:CGRectMake(0, y, [RCTool getScreenSize].width, INPUT_BAR_HEIGHT)];
+        _inputBar.delegate = self;
+    }
+    
+    [self.view addSubview:_inputBar];
 }
 
 @end

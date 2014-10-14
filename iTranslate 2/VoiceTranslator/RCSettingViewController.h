@@ -16,9 +16,9 @@
 @property(nonatomic,retain)UITableView* tableView;
 @property(nonatomic,retain)NSMutableArray* itemArray;
 @property(nonatomic,retain)NSArray* products;
-@property(nonatomic,retain)SKProduct* removeAdProduct;
+//@property(nonatomic,retain)SKProduct* removeAdProduct;
 @property(assign)BOOL isPaying;
-@property(nonatomic,retain)SKProductsRequest *productsRequest;
+//@property(nonatomic,retain)SKProductsRequest *productsRequest;
 @property(nonatomic,strong)NSMutableArray* otherApps;
 
 @end

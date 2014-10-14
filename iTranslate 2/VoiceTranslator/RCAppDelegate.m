@@ -245,24 +245,9 @@
 //    if([RCTool isRemoveAD])
 //        return;
     
-	if(NO == [RCTool isIpad])
-	{
-		_adMobAd = [[GADBannerView alloc]
-                    initWithFrame:CGRectMake(0.0,0,
-                                             kGADAdSizeBanner.size.width,
-                                             kGADAdSizeBanner.size.height)];
-	}
-    else
-    {
-        _adMobAd = [[GADBannerView alloc]
-                    initWithFrame:CGRectMake(0.0,0,
-                                             kGADAdSizeLeaderboard.size.width,
-                                             kGADAdSizeLeaderboard.size.height)];
-    }
+    _adMobAd = [[GADBannerView alloc]
+                initWithAdSize:kGADAdSizeSmartBannerPortrait];
 
-	
-	
-	
 	_adMobAd.adUnitID = [RCTool getAdId];
 	_adMobAd.delegate = self;
 	_adMobAd.alpha = 0.0;

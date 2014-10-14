@@ -20,6 +20,7 @@
 #import <Accounts/Accounts.h>
 #import <MessageUI/MessageUI.h>
 #import <MessageUI/MFMailComposeViewController.h>
+#import "RCInputBar.h"
 
 @class RCRecordController;
 @class AQLevelMeter;
@@ -42,7 +43,7 @@
 @property(nonatomic,retain)RCActionMenu* actionMenu;
 @property(nonatomic,retain)Translation* selectedTranslation;
 @property(nonatomic,assign)BUBBLE_TYPE selectedBubbleType;
-@property(nonatomic,retain)RCEditView* editView;
+@property(nonatomic,retain)RCInputBar* inputBar;
 @property(assign)BOOL isEditing;
 @property(nonatomic,retain)RCMagnifyView* magnifyView;
 @property(nonatomic,retain)UIImageView* loadingImageView;
